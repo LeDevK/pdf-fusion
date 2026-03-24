@@ -1,4 +1,4 @@
-A lightweight, browser-based PDF toolkit. Merge, edit, crop, and password-protect your PDF files — no installation, no internet connection, no data collection.
+A lightweight, browser-based PDF toolkit. Merge, edit, crop, and password-protect your PDF files. No installation, no internet connection, no data collection.
 
 Just open the file in your browser and get to work.
 

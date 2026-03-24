@@ -1,0 +1,3151 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'none';">
+<title>PDF Fusion by ALTEN</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" integrity="sha512-q+4liFwdPC/bNdhUpZx6aXDx/h77yEQtn4I1slHydcbZK34nLaR3cAeYSJshoxIOq3mjEf7xJE8YWIUHMn+oCQ==" crossorigin="anonymous"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --accent:#e8ff47; --accent-dim:rgba(232,255,71,0.12);
+  --blue:#47c8ff;   --blue-dim:rgba(71,200,255,0.10);
+  --green:#47ffaa;  --green-dim:rgba(71,255,170,0.10);
+  --purple:#b47fff; --purple-dim:rgba(180,127,255,0.10);
+  --orange:#ffaa47; --orange-dim:rgba(255,170,71,0.10);
+  --pink:#ff6b9d;   --pink-dim:rgba(255,107,157,0.10);
+  --teal:#47ffd4;   --teal-dim:rgba(71,255,212,0.10);
+  --red:#ff4747;    --red-dim:rgba(255,71,71,0.10);
+}
+[data-theme="dark"]{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#242424;--surface3:#2e2e2e;--border:#2e2e2e;--text:#f0f0f0;--text2:#aaa;--muted:#555;--shadow:rgba(0,0,0,.5);}
+[data-theme="light"]{--bg:#f4f4f0;--surface:#fff;--surface2:#f0f0ec;--surface3:#e4e4e0;--border:#ddddd8;--text:#111;--text2:#555;--muted:#999;--shadow:rgba(0,0,0,.12);}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px 80px;transition:background .3s,color .3s;}
+
+/* TOP BAR */
+.top-bar{position:fixed;top:14px;right:16px;display:flex;gap:8px;z-index:200;align-items:center;}
+.lang-bar{display:flex;gap:3px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;box-shadow:0 2px 12px var(--shadow);}
+.lang-btn{background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:500;cursor:pointer;padding:4px 7px;border-radius:6px;transition:all .15s;}
+.lang-btn:hover{color:var(--text);background:var(--surface2);}
+.lang-btn.active{background:var(--accent);color:#000;font-weight:700;}
+.theme-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px 10px;cursor:pointer;font-size:1rem;transition:all .2s;line-height:1;box-shadow:0 2px 12px var(--shadow);}
+.theme-btn:hover{border-color:var(--accent);}
+
+/* HEADER */
+header{text-align:center;margin-bottom:32px;}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:2.6rem;letter-spacing:-.03em;color:var(--accent);line-height:1;}
+.logo span{color:var(--text);}
+.subtitle{font-size:.92rem;color:var(--muted);margin-top:6px;font-weight:300;}
+
+.container{width:100%;max-width:780px;display:flex;flex-direction:column;gap:14px;}
+
+/* CAPS */
+.caps-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.caps-header{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;cursor:pointer;border-bottom:1px solid transparent;transition:border-color .2s;}
+.caps-panel.open .caps-header{border-bottom-color:var(--border);}
+.caps-title{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;color:var(--text);}
+.caps-chevron{color:var(--muted);font-size:.72rem;transition:transform .25s;}
+.caps-panel.open .caps-chevron{transform:rotate(180deg);}
+.caps-body{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .3s;padding:0 16px;}
+.caps-panel.open .caps-body{max-height:800px;padding:14px 16px;}
+.cap-item{display:flex;gap:9px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);}
+.cap-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.cap-label{font-size:.8rem;color:var(--text);font-weight:500;line-height:1.4;}
+.cap-desc{font-size:.73rem;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* TABS */
+.mode-tabs{display:flex;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:5px;flex-wrap:wrap;}
+.mode-tab{flex:1;min-width:90px;padding:8px 6px;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s;color:var(--muted);background:none;display:flex;align-items:center;justify-content:center;gap:5px;}
+.mode-tab:hover{color:var(--text);background:var(--surface2);}
+.t-pdf    {background:var(--accent-dim)   !important;color:var(--accent)   !important;border:1px solid rgba(232,255,71,.25)  !important;}
+.t-img    {background:var(--blue-dim)     !important;color:var(--blue)     !important;border:1px solid rgba(71,200,255,.25) !important;}
+.t-pages  {background:var(--green-dim)    !important;color:var(--green)    !important;border:1px solid rgba(71,255,170,.25) !important;}
+.t-wm     {background:var(--purple-dim)   !important;color:var(--purple)   !important;border:1px solid rgba(180,127,255,.25)!important;}
+.t-protect{background:var(--orange-dim)   !important;color:var(--orange)   !important;border:1px solid rgba(255,170,71,.25) !important;}
+.t-txt    {background:var(--teal-dim)     !important;color:var(--teal)     !important;border:1px solid rgba(71,255,212,.25) !important;}
+.t-split  {background:var(--pink-dim)     !important;color:var(--pink)     !important;border:1px solid rgba(255,107,157,.25)!important;}
+  .t-crop   {background:rgba(71,212,255,0.12) !important;color:#47d4ff         !important;border:1px solid rgba(71,212,255,.25) !important;}
+  .t-redact {background:rgba(60,60,60,0.5)    !important;color:#ccc            !important;border:1px solid rgba(150,150,150,.3) !important;}
+.t-html   {background:var(--blue-dim)     !important;color:var(--blue)     !important;border:1px solid rgba(71,200,255,.25) !important;}
+.t-ocr    {background:var(--purple-dim)   !important;color:var(--purple)   !important;border:1px solid rgba(180,127,255,.25)!important;}
+
+/* DROPZONE */
+.dropzone{border:2px dashed var(--border);border-radius:16px;padding:36px 24px;text-align:center;cursor:pointer;transition:all .25s;background:var(--surface);position:relative;}
+.dropzone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.dropzone.dz-pdf:hover,.dropzone.dz-pdf.drag-over{border-color:var(--accent);background:var(--accent-dim);}
+.dropzone.dz-img:hover,.dropzone.dz-img.drag-over{border-color:var(--blue);background:var(--blue-dim);}
+.dropzone.dz-pages:hover,.dropzone.dz-pages.drag-over{border-color:var(--green);background:var(--green-dim);}
+.dropzone.dz-wm:hover,.dropzone.dz-wm.drag-over{border-color:var(--purple);background:var(--purple-dim);}
+.dropzone.dz-protect:hover,.dropzone.dz-protect.drag-over{border-color:var(--orange);background:var(--orange-dim);}
+.dropzone.dz-txt:hover,.dropzone.dz-txt.drag-over{border-color:var(--teal);background:var(--teal-dim);}
+.dropzone.dz-split:hover,.dropzone.dz-split.drag-over{border-color:var(--pink);background:var(--pink-dim);}
+.dropzone.dz-html:hover,.dropzone.dz-html.drag-over{border-color:var(--blue);background:var(--blue-dim);}
+.dropzone.dz-ocr:hover,.dropzone.dz-ocr.drag-over{border-color:var(--purple);background:var(--purple-dim);}
+.drop-icon{font-size:2.2rem;margin-bottom:8px;display:block;}
+.drop-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:600;color:var(--text);margin-bottom:4px;}
+.drop-hint{font-size:.82rem;color:var(--muted);}
+
+/* FILE LIST */
+.file-list{display:flex;flex-direction:column;gap:7px;}
+.file-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:9px 13px;display:flex;align-items:center;gap:10px;cursor:grab;transition:all .2s;user-select:none;}
+.file-item:hover{border-color:var(--surface3);background:var(--surface2);}
+.file-item.dragging{opacity:.4;}
+.file-item.drag-target{border-color:var(--accent);background:var(--accent-dim);}
+.file-thumb{width:36px;height:36px;border-radius:7px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);}
+.file-icon{width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0;font-family:'Syne',sans-serif;}
+.fi-pdf{background:var(--accent-dim);color:var(--accent);}
+.fi-img{background:var(--blue-dim);color:var(--blue);}
+.fi-txt{background:var(--teal-dim);color:var(--teal);}
+.fi-htm{background:var(--blue-dim);color:var(--blue);}
+.file-info{flex:1;min-width:0;}
+.file-name{font-size:.86rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
+.file-meta{font-size:.73rem;color:var(--muted);margin-top:2px;}
+.file-handle{color:var(--muted);font-size:1rem;cursor:grab;padding:3px;}
+.file-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.95rem;padding:4px 7px;border-radius:6px;transition:all .15s;line-height:1;}
+.file-remove:hover{color:var(--red);background:var(--red-dim);}
+.order-badge{width:20px;height:20px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);font-size:.68rem;font-weight:600;color:var(--muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Syne',sans-serif;}
+.pdf-preview-thumb{width:36px;height:36px;border-radius:7px;overflow:hidden;flex-shrink:0;border:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;}
+.pdf-preview-thumb canvas{width:100%;height:100%;object-fit:cover;}
+
+/* PAGE EDITOR */
+.page-editor{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:none;}
+.page-editor.visible{display:block;}
+.page-editor-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.page-editor-title{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;color:var(--text);}
+.page-editor-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.page-action-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:.75rem;font-family:'DM Sans',sans-serif;color:var(--text2);cursor:pointer;transition:all .15s;}
+.page-action-btn:hover{border-color:var(--accent);color:var(--text);}
+.page-action-btn.danger:hover{border-color:var(--red);color:var(--red);background:var(--red-dim);}
+.pages-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;padding:14px;max-height:450px;overflow-y:auto;}
+.pages-grid::-webkit-scrollbar{width:5px;}
+.pages-grid::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.page-card{border-radius:10px;overflow:hidden;border:2px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .15s;position:relative;user-select:none;}
+.page-card:hover{border-color:var(--surface3);}
+.page-card.selected{border-color:var(--green);background:var(--green-dim);}
+.page-card.page-dragging{opacity:.35;}
+.page-card.page-drag-over{border-color:var(--accent);}
+.page-canvas-wrap{width:100%;aspect-ratio:.707;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff;}
+.page-canvas-wrap canvas{max-width:100%;max-height:100%;display:block;}
+.page-footer{padding:4px 7px;display:flex;align-items:center;justify-content:space-between;background:var(--surface2);}
+.page-num{font-size:.65rem;color:var(--muted);font-family:'Syne',sans-serif;font-weight:600;}
+.page-rotate-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.8rem;padding:2px 4px;border-radius:4px;transition:all .15s;line-height:1;}
+.page-rotate-btn:hover{color:var(--text);background:var(--surface3);}
+.page-selected-badge{position:absolute;top:5px;right:5px;width:16px;height:16px;border-radius:50%;background:var(--green);display:none;align-items:center;justify-content:center;font-size:.6rem;color:#000;font-weight:700;}
+.page-card.selected .page-selected-badge{display:flex;}
+
+/* PANELS */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:none;flex-direction:column;gap:12px;}
+.panel.visible{display:flex;}
+.panel-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.panel-label{font-size:.8rem;color:var(--muted);font-weight:500;min-width:100px;}
+.opt-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 11px;font-family:'DM Sans',sans-serif;font-size:.78rem;color:var(--muted);cursor:pointer;transition:all .15s;}
+.opt-btn:hover{color:var(--text);border-color:var(--surface3);}
+.opt-btn.sel{background:var(--accent-dim);color:var(--accent);border-color:rgba(232,255,71,.4);}
+.opt-btn.sel-blue{background:var(--blue-dim);color:var(--blue);border-color:rgba(71,200,255,.4);}
+.opt-btn.sel-green{background:var(--green-dim);color:var(--green);border-color:rgba(71,255,170,.4);}
+.opt-btn.sel-purple{background:var(--purple-dim);color:var(--purple);border-color:rgba(180,127,255,.4);}
+.opt-btn.sel-orange{background:var(--orange-dim);color:var(--orange);border-color:rgba(255,170,71,.4);}
+.opt-btn.sel-teal{background:var(--teal-dim);color:var(--teal);border-color:rgba(71,255,212,.4);}
+.opt-btn.sel-pink{background:var(--pink-dim);color:var(--pink);border-color:rgba(255,107,157,.4);}
+.text-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 11px;color:var(--text);font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;}
+.text-input:focus{border-color:var(--accent);}
+.text-input::placeholder{color:var(--muted);}
+.text-input.wide{flex:1;min-width:160px;}
+.range-wrap{display:flex;align-items:center;gap:10px;flex:1;}
+input[type="range"]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--surface3);outline:none;cursor:pointer;}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;}
+.range-val{font-size:.78rem;color:var(--text);font-family:'Syne',sans-serif;font-weight:600;min-width:32px;}
+.color-swatch{width:22px;height:22px;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
+.color-swatch.active{border-color:var(--text);transform:scale(1.15);}
+.info-box{font-size:.73rem;color:var(--muted);line-height:1.5;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;}
+
+/* HTML editor */
+.html-editor{width:100%;min-height:200px;max-height:360px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:monospace;font-size:.8rem;outline:none;resize:vertical;transition:border-color .2s;}
+.html-editor:focus{border-color:var(--blue);}
+
+/* SPLIT options */
+.split-mode-desc{font-size:.75rem;color:var(--muted);line-height:1.5;padding:4px 0;}
+
+/* OCR output */
+.ocr-result{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:.82rem;color:var(--text);line-height:1.6;max-height:300px;overflow-y:auto;white-space:pre-wrap;display:none;}
+.ocr-result.visible{display:block;}
+.ocr-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.ocr-copy-btn{background:var(--purple-dim);border:1px solid rgba(180,127,255,.3);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:.8rem;color:var(--purple);font-family:'DM Sans',sans-serif;}
+.ocr-save-btn{background:var(--green-dim);border:1px solid rgba(71,255,170,.3);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:.8rem;color:var(--green);font-family:'DM Sans',sans-serif;}
+
+/* OPTIONS BAR */
+.options-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.options-label{font-size:.8rem;color:var(--muted);font-weight:500;}
+.ext-badge{font-size:.8rem;color:var(--accent);font-weight:600;flex-shrink:0;}
+
+/* INFO */
+.info-row{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);padding:0 4px;}
+.drag-hint{font-size:.73rem;color:var(--muted);text-align:center;padding:2px 0;}
+
+/* COMP */
+.comp-meter{display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:8px;padding:8px 12px;font-size:.78rem;}
+.comp-bar-bg{flex:1;height:5px;border-radius:3px;background:var(--surface3);overflow:hidden;}
+.comp-bar-fill{height:100%;border-radius:3px;background:var(--green);transition:width .4s;}
+
+/* PROGRESS */
+.progress-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;display:none;}
+.progress-wrap.visible{display:block;}
+.progress-top{display:flex;justify-content:space-between;margin-bottom:9px;font-size:.82rem;}
+.progress-bar-bg{background:var(--surface2);border-radius:99px;height:5px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:var(--accent);border-radius:99px;width:0%;transition:width .3s;}
+
+/* SUCCESS */
+.success-banner{background:rgba(232,255,71,.07);border:1px solid rgba(232,255,71,.25);border-radius:12px;padding:14px;display:none;align-items:center;gap:10px;font-size:.88rem;color:var(--accent);}
+.success-banner.visible{display:flex;}
+
+/* ACTIONS */
+.actions{display:flex;gap:10px;}
+.btn-main{flex:1;border:none;border-radius:12px;padding:14px 22px;font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.02em;color:#000;}
+.btn-main:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.2);}
+.btn-main:disabled{opacity:.3;cursor:not-allowed;transform:none;}
+.bm-pdf{background:var(--accent);}
+.bm-img{background:var(--blue);}
+.bm-pages{background:var(--green);}
+.bm-wm{background:var(--purple);}
+.bm-protect{background:var(--orange);}
+.bm-txt{background:var(--teal);}
+.bm-split{background:var(--pink);}
+.bm-html{background:var(--blue);}
+.bm-ocr{background:var(--purple);}
+.bm-crop{background:#47d4ff;}
+.bm-redact{background:#888;}
+.btn-clear{background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .2s;font-size:.9rem;}
+.btn-clear:hover{color:var(--red);border-color:rgba(255,71,71,.3);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-overlay.visible{display:flex;}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;max-width:90vw;max-height:90vh;display:flex;flex-direction:column;gap:12px;}
+.modal-box canvas{max-width:70vw;max-height:70vh;border-radius:8px;}
+.modal-close{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--text);align-self:flex-end;}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.file-item,.page-card{animation:fadeIn .18s ease;}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="lang-bar">
+    <button class="lang-btn" data-lang="fr">FR</button>
+    <button class="lang-btn" data-lang="en">EN</button>
+    <button class="lang-btn" data-lang="de">DE</button>
+    <button class="lang-btn" data-lang="zh">中文</button>
+    <button class="lang-btn" data-lang="it">IT</button>
+    <button class="lang-btn" data-lang="es">ES</button>
+  </div>
+  <button class="theme-btn" id="themeBtn">🌙</button>
+</div>
+
+<header>
+  <div class="logo">PDF<span>Fusion</span></div>
+  <p class="subtitle" id="subtitle"></p>
+</header>
+
+<div class="container">
+
+  <!-- CAPS -->
+  <div class="caps-panel" id="capsPanel">
+    <div class="caps-header" id="capsHeader">
+      <div style="display:flex;align-items:center;gap:10px;"><span>⚡</span><span class="caps-title" id="capsTitle"></span></div>
+      <span class="caps-chevron">▼</span>
+    </div>
+    <div class="caps-body" id="capsBody"></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="mode-tabs">
+    <button class="mode-tab t-pdf"  id="tab-pdf"     data-mode="pdf">    📄 <span id="lbl-pdf"></span></button>
+    <button class="mode-tab"        id="tab-img"     data-mode="img">    🖼️ <span id="lbl-img"></span></button>
+    <button class="mode-tab"        id="tab-txt"     data-mode="txt">    📝 <span id="lbl-txt"></span></button>
+    <button class="mode-tab"        id="tab-html"    data-mode="html">   🌐 <span id="lbl-html"></span></button>
+    <button class="mode-tab"        id="tab-pages"   data-mode="pages">  ✂️ <span id="lbl-pages"></span></button>
+    <button class="mode-tab"        id="tab-split"   data-mode="split">  ✂️ <span id="lbl-split"></span></button>
+    <button class="mode-tab"        id="tab-crop"    data-mode="crop">   🔲 <span id="lbl-crop"></span></button>
+    <button class="mode-tab"        id="tab-redact"  data-mode="redact"> 🖊️ <span id="lbl-redact"></span></button>
+    <button class="mode-tab"        id="tab-wm"      data-mode="wm">     🔏 <span id="lbl-wm"></span></button>
+    <button class="mode-tab"        id="tab-protect" data-mode="protect">🔒 <span id="lbl-protect"></span></button>
+    <button class="mode-tab"        id="tab-ocr"     data-mode="ocr">    🔍 <span id="lbl-ocr"></span></button>
+  </div>
+
+  <!-- DROP ZONE -->
+  <div class="dropzone dz-pdf" id="dropzone">
+    <input type="file" id="fileInput" multiple />
+    <span class="drop-icon" id="dropIcon">📄</span>
+    <div class="drop-title" id="dropTitle"></div>
+    <p class="drop-hint" id="dropHint"></p>
+  </div>
+
+  <!-- HTML EDITOR (html mode only) -->
+  <div id="htmlEditorWrap" style="display:none;flex-direction:column;gap:8px;">
+    <div style="font-size:.8rem;color:var(--muted)" id="htmlEditorLabel"></div>
+    <textarea class="html-editor" id="htmlEditor" spellcheck="false"></textarea>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="opt-btn sel-blue" data-tpl="basic" id="htmlTplBasic"></button>
+      <button class="opt-btn" data-tpl="table" id="htmlTplTable"></button>
+      <button class="opt-btn" data-tpl="letter" id="htmlTplLetter"></button>
+    </div>
+  </div>
+
+  <!-- FILE LIST -->
+  <div class="file-list" id="fileList"></div>
+
+  <!-- PAGE EDITOR (pages + split modes) -->
+  <div class="page-editor" id="pageEditor">
+    <div class="page-editor-header">
+      <span class="page-editor-title" id="pageEditorTitle"></span>
+      <div class="page-editor-actions">
+        <button class="page-action-btn" id="btnSelectAll"></button>
+        <button class="page-action-btn" id="btnSelectNone"></button>
+        <button class="page-action-btn" id="btnRotate90">↻ 90°</button>
+        <button class="page-action-btn" id="btnRotateMinus90">↺ 90°</button>
+        <button class="page-action-btn danger" id="btnDelete"></button>
+      </div>
+    </div>
+    <div class="pages-grid" id="pagesGrid"></div>
+  </div>
+
+  <!-- SPLIT OPTIONS -->
+  <div class="panel" id="splitPanel">
+    <div class="panel-row">
+      <span class="panel-label" id="splitModeLabel"></span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;" id="splitModeGroup"></div>
+    </div>
+    <div id="splitByNWrap" class="panel-row" style="display:none">
+      <span class="panel-label" id="splitEveryLabel"></span>
+      <input type="number" class="text-input" id="splitEveryN" min="1" max="999" value="1" style="width:70px;">
+      <span style="font-size:.8rem;color:var(--muted)" id="splitEveryUnit"></span>
+    </div>
+    <div id="splitByRangeWrap" style="display:none;flex-direction:column;gap:8px;">
+      <div style="font-size:.8rem;color:var(--muted)" id="splitRangeLabel"></div>
+      <textarea class="text-input wide" id="splitRanges" rows="3" style="resize:none;font-family:monospace;font-size:.8rem;" placeholder="1-3, 4-7, 8"></textarea>
+      <div class="info-box" id="splitRangeHint"></div>
+    </div>
+    <div class="info-box" id="splitModeDesc"></div>
+  </div>
+
+  <!-- IMG OPTIONS -->
+  <div class="panel" id="imgOptions">
+    <div class="panel-row">
+      <span class="panel-label" id="pageSizeLabel"></span>
+      <div style="display:flex;gap:6px;" id="pageSizeGroup"></div>
+    </div>
+    <div class="panel-row">
+      <span class="panel-label" id="fitLabel"></span>
+      <div style="display:flex;gap:6px;" id="fitGroup"></div>
+    </div>
+  </div>
+
+  <!-- COMPRESSION -->
+  <div class="panel" id="compressionPanel">
+    <div class="panel-row">
+      <span class="panel-label" id="compLevelLabel"></span>
+      <div class="range-wrap">
+        <input type="range" id="compRange" min="1" max="3" value="2">
+        <span class="range-val" id="compVal"></span>
+      </div>
+    </div>
+    <div id="compInfoBox" style="font-size:.75rem;color:var(--muted);margin-top:6px;display:none"></div>
+  </div>
+
+  <!-- TXT OPTIONS -->
+  <div class="panel" id="txtPanel">
+    <div class="panel-row">
+      <span class="panel-label" id="txtFontSizeLabel"></span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;" id="txtFontSizeGroup"></div>
+    </div>
+    <div class="panel-row">
+      <span class="panel-label" id="txtPageSzLabel"></span>
+      <div style="display:flex;gap:6px;" id="txtPageSzGroup"></div>
+    </div>
+    <div class="panel-row">
+      <span class="panel-label" id="txtMgLabel"></span>
+      <div style="display:flex;gap:6px;" id="txtMgGroup"></div>
+    </div>
+    <div class="info-box" id="txtPreviewInfo" style="display:none"></div>
+  </div>
+
+  <!-- HTML OPTIONS -->
+  <div class="panel" id="htmlOptions">
+    <div class="panel-row">
+      <span class="panel-label" id="htmlPageSzLabel"></span>
+      <div style="display:flex;gap:6px;" id="htmlPageSzGroup"></div>
+    </div>
+    <div class="panel-row">
+      <span class="panel-label" id="htmlMgLabel"></span>
+      <div style="display:flex;gap:6px;" id="htmlMgGroup"></div>
+    </div>
+    <div class="info-box" id="htmlInfo"></div>
+  </div>
+
+  <!-- WATERMARK OPTIONS -->
+  <div class="panel" id="wmPanel">
+    <div class="panel-row">
+      <span class="panel-label" id="wmTextLabel"></span>
+      <input type="text" class="text-input wide" id="wmText" value="CONFIDENTIEL" />
+    </div>
+    <div class="panel-row">
+      <span class="panel-label" id="wmOpacityLabel"></span>
+      <div class="range-wrap">
+        <input type="range" id="wmOpacity" min="5" max="60" value="25">
+        <span class="range-val" id="wmOpacityVal">25%</span>
+      </div>
+    </div>
+    <div class="panel-row">
+      <span class="panel-label" id="wmSizeLabel"></span>
+      <div class="range-wrap">
+        <input type="range" id="wmSize" min="20" max="80" value="48">
+        <span class="range-val" id="wmSizeVal">48</span>
+      </div>
+    </div>
+    <div class="panel-row">
+      <span class="panel-label" id="wmColorLabel"></span>
+      <div style="display:flex;gap:6px;" id="wmColorRow"></div>
+    </div>
+    <div class="panel-row">
+      <span class="panel-label" id="wmPosLabel"></span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;" id="wmPosGroup"></div>
+    </div>
+    <!-- Live preview -->
+    <div style="border-top:1px solid var(--border);padding-top:12px;">
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px;" id="wmPreviewLabel"></div>
+      <div id="wmPreviewWrap" style="background:#fff;border-radius:10px;overflow:hidden;border:1px solid var(--border);position:relative;line-height:0;min-height:200px;">
+        <canvas id="wmPreviewCanvas" style="display:block;width:100%;"></canvas>
+        <div id="wmPreviewPlaceholder" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#999;background:#f7f7f7;">
+          Chargez un PDF pour voir l'aperçu sur votre document
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- CROP OPTIONS -->
+  <div class="panel" id="cropPanel">
+    <div class="panel-row">
+      <span class="panel-label" id="cropApplyLabel"></span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;" id="cropApplyGroup"></div>
+    </div>
+    <div class="panel-row" id="cropPageSelectorRow" style="display:none">
+      <span class="panel-label" id="cropPageLabel"></span>
+      <input type="number" class="text-input" id="cropPageNum" min="1" value="1" style="width:70px;">
+      <span style="font-size:.8rem;color:var(--muted)" id="cropPageTotal"></span>
+      <button class="opt-btn" id="cropPrevBtn" style="padding:4px 9px;">&#8249;</button>
+      <button class="opt-btn" id="cropNextBtn" style="padding:4px 9px;">&#8250;</button>
+    </div>
+    <div style="font-size:.75rem;color:var(--muted);line-height:1.5;" id="cropDrawHint"></div>
+    <div id="cropCoordsRow" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+      <span style="font-size:.72rem;color:var(--muted);" id="cropCoordsLabel"></span>
+      <span style="font-size:.72rem;font-family:monospace;color:#47d4ff;" id="cropCoordsVal"></span>
+      <button class="opt-btn" id="cropResetBtn" style="margin-left:auto;font-size:.72rem;"></button>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:12px;">
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px;" id="cropPreviewLabel"></div>
+      <div id="cropPreviewWrap" style="background:#fff;border-radius:10px;overflow:hidden;border:1px solid var(--border);position:relative;line-height:0;cursor:crosshair;min-height:180px;">
+        <canvas id="cropPreviewCanvas" style="display:block;width:100%;user-select:none;"></canvas>
+        <div id="cropPreviewPlaceholder" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#999;background:#f7f7f7;" id="cropPlaceholder"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REDACT OPTIONS -->
+  <div class="panel" id="redactPanel">
+    <!-- Security warning -->
+    <div style="background:rgba(255,170,71,0.1);border:1px solid rgba(255,170,71,0.4);border-radius:8px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;">
+      <span style="font-size:1.1rem;flex-shrink:0;">⚠️</span>
+      <div style="font-size:.75rem;color:var(--orange);line-height:1.5;" id="redactWarning"></div>
+    </div>
+    <div class="panel-row">
+      <span class="panel-label" id="redactColorLabel"></span>
+      <div style="display:flex;gap:6px;" id="redactColorGroup"></div>
+    </div>
+    <div class="panel-row">
+      <span class="panel-label" id="redactPageLabel"></span>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="number" class="text-input" id="redactPageNum" min="1" value="1" style="width:70px;">
+        <span style="font-size:.8rem;color:var(--muted)" id="redactPageTotal"></span>
+        <button class="opt-btn" id="redactPrevBtn" style="padding:4px 9px;">‹</button>
+        <button class="opt-btn" id="redactNextBtn" style="padding:4px 9px;">›</button>
+      </div>
+    </div>
+    <div style="font-size:.75rem;color:var(--muted);margin-bottom:4px;" id="redactDrawHint"></div>
+    <!-- Drawing canvas -->
+    <div id="redactCanvasWrap" style="background:#fff;border-radius:10px;overflow:hidden;border:1px solid var(--border);position:relative;line-height:0;cursor:crosshair;min-height:180px;">
+      <canvas id="redactCanvas" style="display:block;width:100%;user-select:none;"></canvas>
+      <div id="redactPlaceholder" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#999;background:#f7f7f7;">Chargez un PDF pour dessiner les zones à censurer</div>
+    </div>
+    <!-- Zones list -->
+    <div id="redactZonesList" style="display:flex;flex-direction:column;gap:6px;max-height:140px;overflow-y:auto;"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="opt-btn" id="redactClearBtn" style="color:var(--red);border-color:rgba(255,71,71,.3);"></button>
+    </div>
+  </div>
+
+  <!-- PROTECT OPTIONS -->
+  <div class="panel" id="protectPanel">
+    <div class="panel-row">
+      <span class="panel-label" id="encAlgoLabel"></span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;" id="encAlgoGroup"></div>
+    </div>
+    <div class="info-box" id="encAlgoInfo"></div>
+    <div class="panel-row">
+      <span class="panel-label" id="pwdLabel"></span>
+      <div style="flex:1;position:relative;">
+        <input type="password" class="text-input wide" id="pwdInput" autocomplete="new-password" />
+        <button id="pwdVisBtn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.85rem;padding:2px;">👁</button>
+      </div>
+    </div>
+    <div id="pwdStrengthWrap" style="display:none">
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:4px;">
+        <span id="pwdStrengthLabel"></span><span id="pwdStrengthScore" style="font-family:'Syne',sans-serif;font-weight:700;"></span>
+      </div>
+      <div style="height:4px;border-radius:2px;background:var(--surface3);overflow:hidden;"><div id="pwdStrengthBar" style="height:100%;border-radius:2px;transition:width .3s,background .3s;width:0%;"></div></div>
+    </div>
+    <div class="panel-row">
+      <span class="panel-label" id="pwdConfirmLabel"></span>
+      <div style="flex:1;position:relative;">
+        <input type="password" class="text-input wide" id="pwdConfirm" autocomplete="new-password" />
+        <button id="pwdConfirmVisBtn" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.85rem;padding:2px;">👁</button>
+      </div>
+    </div>
+    <!-- Pepper -->
+    <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div><div style="font-size:.82rem;font-weight:600;color:var(--text)" id="pepperTitle"></div><div style="font-size:.72rem;color:var(--muted);margin-top:2px" id="pepperDesc"></div></div>
+        <div style="display:flex;gap:6px;">
+          <button class="opt-btn sel-orange" id="pepperModeManual"></button>
+          <button class="opt-btn" id="pepperModeAuto"></button>
+        </div>
+      </div>
+      <div id="pepperManualWrap" class="panel-row">
+        <span class="panel-label" id="pepperManualLabel"></span>
+        <input type="text" class="text-input wide" id="pepperManual" autocomplete="off" spellcheck="false" placeholder="ex: ALTEN-2024" />
+      </div>
+      <div id="pepperAutoWrap" style="display:none">
+        <div class="panel-row" style="gap:8px;">
+          <span class="panel-label" id="pepperAutoLabel"></span>
+          <div style="flex:1;display:flex;gap:6px;align-items:center;">
+            <input type="text" class="text-input wide" id="pepperAutoVal" readonly style="font-family:monospace;font-size:.78rem;color:var(--orange);" />
+            <button id="pepperGenBtn" style="background:var(--orange-dim);border:1px solid rgba(255,170,71,.3);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:.8rem;color:var(--orange);white-space:nowrap;"></button>
+          </div>
+        </div>
+        <div class="info-box" style="margin-top:6px;border-color:rgba(255,170,71,.3);" id="pepperAutoHint"></div>
+      </div>
+      <div id="pepperPreview" class="info-box" style="display:none;font-family:monospace;font-size:.72rem;"></div>
+    </div>
+    <!-- Permissions -->
+    <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:8px;">
+      <div style="font-size:.82rem;font-weight:600;color:var(--text)" id="permTitle"></div>
+      <div id="permGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"></div>
+    </div>
+    <div class="info-box" id="pwdHint"></div>
+  </div>
+
+  <!-- OCR OPTIONS -->
+  <div class="panel" id="ocrOptionsPanel">
+    <div class="panel-row">
+      <span class="panel-label" id="ocrLangLabel"></span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;" id="ocrLangGroup">
+        <button class="opt-btn sel-blue" data-lang="fra">Français</button>
+        <button class="opt-btn sel-blue" data-lang="eng">English</button>
+        <button class="opt-btn sel-blue" data-lang="deu">Deutsch</button>
+        <button class="opt-btn" data-lang="spa">Español</button>
+        <button class="opt-btn" data-lang="ita">Italiano</button>
+        <button class="opt-btn" data-lang="chi_sim">中文</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OCR OUTPUT -->
+  <div class="panel" id="ocrPanel" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <span style="font-size:.82rem;font-weight:600;color:var(--text)" id="ocrResultLabel"></span>
+      <div class="ocr-actions">
+        <button class="ocr-copy-btn" id="ocrCopyBtn"></button>
+        <button class="ocr-save-btn" id="ocrSaveBtn"></button>
+        <button class="ocr-save-btn" id="ocrSavePdfBtn" style="background:var(--purple-dim);border-color:rgba(180,127,255,.3);color:var(--purple);"></button>
+      </div>
+    </div>
+    <div class="ocr-result visible" id="ocrResult"></div>
+    <div style="font-size:.72rem;color:var(--muted)" id="ocrLangNote"></div>
+  </div>
+
+  <!-- OPTIONS BAR -->
+  <div class="options-bar" id="optionsBar" style="display:none">
+    <span class="options-label" id="optionsLabel"></span>
+    <input type="text" class="text-input wide" id="outputName" />
+    <span class="ext-badge" id="extBadge">.pdf</span>
+  </div>
+
+  <div class="info-row" id="infoRow" style="display:none">
+    <span id="fileCount"></span><span id="totalSize"></span>
+  </div>
+  <div class="drag-hint" id="dragHint" style="display:none"></div>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-top">
+      <span id="progressLabel" style="color:var(--text);font-size:.82rem;"></span>
+      <span id="progressPct" style="color:var(--accent);font-weight:600;font-family:'Syne',sans-serif;font-size:.82rem;">0%</span>
+    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar"></div></div>
+    <div style="margin-top:8px;text-align:right;"><button id="cancelBtn" style="display:none;background:none;border:1px solid var(--border);border-radius:8px;padding:4px 14px;cursor:pointer;font-size:.78rem;color:var(--muted);font-family:'DM Sans',sans-serif;"></button></div>
+  </div>
+
+  <div class="success-banner" id="successBanner">
+    <span style="font-size:1.2rem;">✅</span>
+    <span id="successText"></span>
+  </div>
+
+  <div class="actions">
+    <button class="btn-main bm-pdf" id="actionBtn" disabled></button>
+    <button class="btn-clear" id="clearAllBtn">🗑</button>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box" id="modalBox">
+    <canvas id="modalCanvas"></canvas>
+    <button class="modal-close" id="modalClose">✕</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// I18N — minimal: FR full, others extend FR
+// ═══════════════════════════════════════════
+const BASE = {
+  subtitle:"Glissez, réorganisez, 100% offline, aucune collecte de donnée.",
+  capsTitle:"Fonctionnalités disponibles",
+  caps:[
+    {dot:'accent', label:'Fusion PDF',          desc:'Combinez plusieurs PDFs en un fichier, dans l\'ordre choisi.'},
+    {dot:'blue',   label:'Images → PDF',         desc:'Convertissez JPG, PNG, WebP, GIF, BMP en PDF.'},
+    {dot:'teal',   label:'TXT → PDF',            desc:'Convertissez des fichiers .txt en PDF avec pagination automatique.'},
+    {dot:'blue',   label:'HTML → PDF',           desc:'Collez du code HTML et exportez-le en PDF mis en page.'},
+    {dot:'green',  label:'Éditeur de pages',     desc:'Réorganisez, supprimez ou pivotez les pages d\'un PDF.'},
+    {dot:'pink',   label:'Diviser un PDF',       desc:'Séparez un PDF en plusieurs fichiers par page ou par plages.'},
+    {dot:'purple', label:'Filigrane',            desc:'Ajoutez un texte en filigrane sur toutes les pages.'},
+    {dot:'orange', label:'Mot de passe',         desc:'Chiffrez votre PDF (AES-128 / AES-256).'},
+    {dot:'purple', label:'OCR',                  desc:'Extrayez le texte d\'un PDF scanné ou d\'une image.'},
+    {dot:'teal',   label:'Rogner',                 desc:'Rognez les marges ou une zone d\'un PDF, toutes pages ou page par page.'},
+    {dot:'green',  label:'Censurer',               desc:'Masquez visuellement des zones d\'un PDF (méthode non sécurisée).'},
+  ],
+  tabs:{pdf:"Fusionner",img:"Images→PDF",txt:"TXT→PDF",html:"HTML→PDF",pages:"Éditeur",split:"Diviser",crop:"Rogner",redact:"Censurer",wm:"Filigrane",protect:"Protéger",ocr:"OCR"},
+  dropTitle:{
+    pdf:"Glissez vos fichiers PDF ici",img:"Glissez vos images ici",
+    txt:"Glissez vos fichiers .txt ici",html:"Mode HTML — utilisez l'éditeur ci-dessous",
+    pages:"Glissez un PDF à éditer",split:"Glissez un PDF à diviser",
+    crop:"Glissez un PDF à rogner",redact:"Glissez un PDF à censurer",
+    wm:"Glissez un PDF pour ajouter un filigrane",protect:"Glissez un PDF à protéger",
+    ocr:"Glissez un PDF ou une image pour l'OCR",
+  },
+  dropHint:{
+    pdf:"ou cliquez • plusieurs fichiers",img:"JPG, PNG, WebP, GIF, BMP • plusieurs fichiers",
+    txt:"ou cliquez • plusieurs fichiers .txt acceptés",html:"(aucun fichier nécessaire)",
+    pages:"ou cliquez • un seul fichier",split:"ou cliquez • un seul fichier",
+    crop:"ou cliquez • un seul fichier",redact:"ou cliquez • un seul fichier",
+    wm:"ou cliquez",protect:"ou cliquez",
+    ocr:"PDF ou JPG/PNG • un seul fichier",
+  },
+  defaultName:{pdf:"document-fusionné",img:"images-converties",txt:"texte-converti",html:"html-converti",pages:"document-édité",split:"partie",crop:"document-rogné",redact:"document-censuré",wm:"document-filigrané",protect:"document-protégé",ocr:"texte-extrait"},
+  optionsLabel:"Nom du fichier :",
+  actionBtn:{pdf:"Fusionner les PDFs",img:"Convertir en PDF",txt:"Convertir en PDF",html:"Générer le PDF",pages:"Exporter",split:"Diviser le PDF",crop:"Appliquer le rognage",redact:"Appliquer la censure",wm:"Appliquer le filigrane",protect:"Protéger le PDF",ocr:"Lancer l'OCR"},
+  placeholder:"nom-du-fichier",
+  dragHint:"⠿ Glissez pour réorganiser",
+  pageSizeLabel:"Format :", pageSizes:{A4:"A4",Letter:"Letter",Auto:"Auto"},
+  fitLabel:"Ajustement :", fitCover:"Remplir", fitContain:"Contenir",
+  compLevelLabel:"Optimisation :", compLevels:["Compatible (sans flux)","Standard","Flux d'objets (compact)"], compInfo:"La réduction dépend du contenu du PDF.",
+  txtFontSizeLabel:"Police :", txtFontSizes:{small:"Petit (9pt)",normal:"Normal (11pt)",large:"Grand (14pt)"},
+  txtPageSzLabel:"Format :", txtMgLabel:"Marges :", txtMarginSizes:{small:"Réduites",normal:"Normales",large:"Larges"},
+  txtPreviewInfo:(f,p)=>`${f} fichier${f>1?'s':''} • ~${p} page${p>1?'s':''} estimées`,
+  htmlPageSzLabel:"Format :", htmlMgLabel:"Marges :",
+  htmlEditorLabel:"Collez ou écrivez votre HTML ci-dessous :",
+  htmlInfo:"Le HTML est rendu dans un iframe invisible, puis chaque page est capturée en image et inséré dans le PDF.",
+  htmlTplBasic:"Template basique", htmlTplTable:"Tableau", htmlTplLetter:"Lettre",
+  splitModeLabel:"Méthode :",
+  splitModes:{each:"Chaque page",everyN:"Toutes les N pages",ranges:"Plages personnalisées"},
+  splitEveryLabel:"Toutes les :", splitEveryUnit:"pages",
+  splitRangeLabel:"Plages de pages (ex: 1-3, 4, 5-8) :",
+  splitRangeHint:"Chaque plage sera exportée dans un fichier séparé.",
+  splitModeDescs:{
+    each:"Chaque page du PDF sera exportée dans un fichier séparé.",
+    everyN:"Le PDF sera découpé en tranches de N pages.",
+    ranges:"Définissez les plages manuellement. Chaque plage donne un fichier.",
+  },
+  wmTextLabel:"Texte :", wmOpacityLabel:"Opacité :", wmSizeLabel:"Taille :", wmColorLabel:"Couleur :", wmPosLabel:"Position :",
+  wmPositions:{diagonal:"Diagonal",center:"Centre",topLeft:"Haut gauche",bottomRight:"Bas droite"},
+  encAlgoLabel:"Algorithme :",
+  encAlgos:{
+    'aes-128':{label:"AES-128",badge:"PDF 1.6",desc:"AES 128 bits. Usage courant. Adobe Reader 7+."},
+    'aes-256':{label:"AES-256",badge:"PDF 1.7",desc:"AES 256 bits. Niveau maximum. Tous lecteurs modernes."},
+  },
+  pwdLabel:"Mot de passe :", pwdConfirmLabel:"Confirmer :",
+  pwdStrengthLabel:"Force :", pwdStrengths:["Très faible","Faible","Moyen","Fort","Très fort"],
+  pepperTitle:"Pepper (renforcement)", pepperDesc:"Chaîne secrète ajoutée au mot de passe avant chiffrement.",
+  pepperModeManual:"Manuel", pepperModeAuto:"Auto-généré",
+  pepperManualLabel:"Valeur :", pepperAutoLabel:"Valeur :", pepperGenBtn:"↻ Regénérer",
+  pepperAutoHint:"⚠️ Notez cette valeur — requise pour ouvrir le PDF.",
+  pepperPreview:(pwd,p)=>p?`Clé = "${p}" + "${pwd}" = "${p}${pwd}"`:'',
+  permTitle:"Droits de l'utilisateur",
+  permissions:{printing:"Impression",copying:"Copie texte",modifying:"Modification",annotations:"Annotations"},
+  pwdHint:"Mot de passe + pepper sont combinés avant chiffrement. Conservez les deux.",
+  ocrResultLabel:"Texte extrait :", ocrCopyBtn:"📋 Copier", ocrSaveBtn:"💾 Sauvegarder .txt", ocrSavePdfBtn:"📄 Exporter PDF",
+  ocrLangNote:"OCR via Tesseract.js (chargement ~8\u00a0MB au premier lancement).",
+  wmPreviewLabel:"Aperçu",
+  pageEditorTitle:(n)=>`${n} page${n>1?'s':''}`,
+  btnSelectAll:"Tout sélect.", btnSelectNone:"Désélect.", btnDelete:"Supprimer",
+  progressInit:"Initialisation…", progressRead:(n)=>`Lecture de "${n}"…`,
+  progressConvert:(n)=>`Conversion de "${n}"…`,progressGen:"Génération du PDF…",
+  progressDl:"Téléchargement…",progressWm:"Application du filigrane…",
+  progressProtect:"Chiffrement…",progressPages:"Export…",
+  progressSplit:(i,n)=>`Partie ${i}/${n}…`,progressOcr:(n)=>`OCR page ${n}…`,
+  progressHtml:"Rendu HTML…",progressTxt:(n)=>`Conversion de "${n}"…`,
+  successPdf:(name,n)=>`"${name}" — ${n} fichier${n>1?'s':''} fusionnés.`,
+  successImg:(name,n)=>`"${name}" — ${n} image${n>1?'s':''} convertie${n>1?'s':''}.`,
+  successTxt:(name,n)=>`"${name}" — ${n} fichier${n>1?'s':''} converti${n>1?'s':''}.`,
+  successHtml:(name)=>`"${name}" généré depuis HTML.`,
+  successPages:(name,n)=>`"${name}" — ${n} page${n>1?'s':''}.`,
+  successSplit:(n)=>`${n} fichier${n>1?'s':''} téléchargé${n>1?'s':''}.`,
+  successWm:(name)=>`"${name}" avec filigrane.`,
+  successProtect:(name)=>`"${name}" protégé.`,
+  successOcr:"OCR terminé.",
+  successCrop:(name)=>`"${name}" rogné.`,
+  successRedact:(name,n)=>`"${name}" — ${n} zone${n>1?'s':''} censurée${n>1?'s':''}.`,
+  cropApplyLabel:"Appliquer à :",
+  cropApplyModes:{all:"Toutes les pages",single:"Page spécifique"},
+  cropPageLabel:"Page :",
+  cropDrawHint:"Dessinez un rectangle sur l'aperçu pour définir la zone à conserver. Glissez les poignées pour ajuster.",
+  cropCoordsLabel:"Zone conservée :",
+  cropResetBtn:"\u21BA R\u00e9initialiser",
+  cropPreviewLabel:"Aper\u00e7u interactif \u2014 zone bleue = zone conserv\u00e9e",
+  cropPreviewPlaceholder:"Chargez un PDF pour voir l'aper\u00e7u",
+  progressCrop:"Rognage\u2026", progressRedact:"Censure\u2026",
+  redactWarning:"⚠️ Méthode non sécurisée : les rectangles noirs masquent visuellement le contenu mais ne le suppriment pas du fichier PDF. Le texte original reste extractible. N'utilisez pas cette méthode pour protéger des données sensibles ou confidentielles.",
+  redactColorLabel:"Couleur :",
+  redactPageLabel:"Page :",
+  redactDrawHint:"Dessinez des rectangles à la souris sur l'aperçu pour marquer les zones à censurer.",
+  redactClearBtn:"🗑 Effacer toutes les zones",
+  errorNoRedactZones:"Aucune zone de censure définie.",
+  errorMsg:(m)=>`Erreur : ${m}`, errorProtected:(n)=>`Impossible de lire "${n}" — protégé?`,
+  errorRead:"Erreur de lecture", errorPwdMismatch:"Les mots de passe ne correspondent pas.",
+  errorPwdEmpty:"Veuillez saisir un mot de passe.",errorNoPages:"Aucune page sélectionnée.",errorDeleteAllPages:"Impossible de supprimer toutes les pages.",errorNoCropZone:"Définissez une zone de rognage.",
+  errorNoHtml:"L'éditeur HTML est vide.", errorOcrFail:"Échec OCR.",
+  errorFileTooLarge:(max)=>`Fichier trop volumineux (max ${max}). Fichier ignoré.`,
+  errorFileEmpty:"Le fichier est vide et a été ignoré.",
+  warnFileLarge:(size)=>`Fichier volumineux (${size}). Le traitement peut être lent.`,
+  errorPasswordRequired:"Ce PDF est protégé par mot de passe. Entrez le mot de passe :",
+  errorPasswordWrong:"Mot de passe incorrect, réessayez :",
+  errorCancelled:"Opération annulée.",
+  errorTimeout:"Délai dépassé (5 min). L'opération a été annulée.",
+  btnCancel:"Annuler",
+  ocrLangLabel:"Langues OCR :",
+  progressTesseract:"Chargement de Tesseract…",
+  htmlFallbackPage:(n)=>`Page ${n} — prévisualisation non disponible dans ce navigateur.`,
+  confirmClearAll:"Effacer tous les fichiers chargés ?",
+  redactConfirmMsg:"⚠️ Rappel : la censure appliquée est visuelle uniquement.\nLe texte original reste présent dans le fichier PDF.\n\nContinuer quand même ?",
+  ariaThemeBtn:"Changer de thème", ariaClearAll:"Effacer tous les fichiers",
+  ariaRotate90:"Pivoter de 90° (sens horaire)", ariaRotateMinus90:"Pivoter de 90° (sens anti-horaire)",
+  ariaPwdVis:"Afficher / Masquer le mot de passe",
+  ariaPrevPage:"Page précédente", ariaNextPage:"Page suivante",
+  ariaModalClose:"Fermer la prévisualisation",
+  wmPreviewPlaceholderText:"Chargez un PDF pour voir l'aperçu sur votre document",
+  redactPlaceholderText:"Chargez un PDF pour dessiner les zones à censurer",
+  filesIgnoredPdf:(n)=>`${n} fichier(s) ignoré(s) : PDFs uniquement.`,
+  filesIgnoredImg:(n)=>`${n} fichier(s) ignoré(s) : format non supporté.`,
+  filesIgnoredTxt:(n)=>`${n} fichier(s) ignoré(s) : .txt uniquement.`,
+  fileCount:(n)=>`${n} fichier${n>1?'s':''}`, totalSize:(s)=>`${s} total`,
+  removeTitle:"Supprimer", closeModal:"✕ Fermer",
+  sizeUnits:{o:'o',ko:'Ko',mo:'Mo'},
+};
+
+// Per-language overrides (only what differs)
+const LANGS = {
+  fr: {},
+  en: {
+    subtitle:"Drag, reorder, 100% offline, no data collection.",
+    capsTitle:"Available features",
+    caps:[
+      {dot:'accent',label:'PDF Merge',          desc:'Combine multiple PDFs into one file.'},
+      {dot:'blue',  label:'Images → PDF',        desc:'Convert JPG, PNG, WebP, GIF, BMP to PDF.'},
+      {dot:'teal',  label:'TXT → PDF',           desc:'Convert .txt files to PDF with automatic pagination.'},
+      {dot:'blue',  label:'HTML → PDF',          desc:'Paste HTML code and export it as a styled PDF.'},
+      {dot:'green', label:'Page editor',         desc:'Reorder, delete or rotate pages of a PDF.'},
+      {dot:'pink',  label:'Split PDF',           desc:'Split a PDF into multiple files by page or range.'},
+      {dot:'purple',label:'Watermark',           desc:'Add a text watermark to all pages.'},
+      {dot:'orange',label:'Password protect',    desc:'Encrypt your PDF (AES-128/AES-256).'},
+      {dot:'purple',label:'OCR',                 desc:'Extract text from a scanned PDF or image.'},
+      {dot:'teal',  label:'Crop',                desc:'Crop margins or a custom area, all pages or page by page.'},
+      {dot:'green', label:'Redact',              desc:'Visually mask areas of a PDF (non-secure method).'},
+    ],
+    tabs:{pdf:"Merge",img:"Images→PDF",txt:"TXT→PDF",html:"HTML→PDF",pages:"Editor",split:"Split",crop:"Crop",redact:"Redact",wm:"Watermark",protect:"Protect",ocr:"OCR"},
+    dropTitle:{pdf:"Drop your PDF files here",img:"Drop your images here",txt:"Drop your .txt files here",html:"HTML mode — use the editor below",pages:"Drop a PDF to reorder",split:"Drop a PDF to split",crop:"Drop a PDF to crop",redact:"Drop a PDF to redact",wm:"Drop a PDF for watermark",protect:"Drop a PDF to protect",ocr:"Drop a PDF or image for OCR"},
+    dropHint:{pdf:"or click • multiple files",img:"JPG, PNG, WebP, GIF, BMP",txt:"or click • multiple .txt files",html:"(no file needed)",pages:"or click • single file",split:"or click • single file",crop:"or click • single file",redact:"or click • single file",wm:"or click",protect:"or click",ocr:"PDF or JPG/PNG • single file"},
+    defaultName:{pdf:"merged-document",img:"converted-images",txt:"converted-text",html:"html-export",pages:"edited-document",split:"part",crop:"cropped-document",redact:"redacted-document",wm:"watermarked",protect:"protected",ocr:"extracted-text"},
+    optionsLabel:"File name:", placeholder:"file-name", dragHint:"⠿ Drag to reorder",
+    pageSizes:{A4:"A4",Letter:"Letter",Auto:"Auto"}, fitCover:"Cover", fitContain:"Contain",
+    compLevels:["Compatible (no streams)","Standard","Object streams (compact)"], compInfo:"Actual size reduction depends on PDF content.", txtFontSizes:{small:"Small (9pt)",normal:"Normal (11pt)",large:"Large (14pt)"},
+    txtMarginSizes:{small:"Narrow",normal:"Normal",large:"Wide"},
+    txtPreviewInfo:(f,p)=>`${f} file${f>1?'s':''} • ~${p} page${p>1?'s':''} estimated`,
+    htmlEditorLabel:"Paste or write your HTML below:",
+    htmlInfo:"HTML is rendered in a hidden iframe, each page captured as an image and inserted into the PDF.",
+    htmlTplBasic:"Basic template",htmlTplTable:"Table",htmlTplLetter:"Letter",
+    splitModes:{each:"Each page",everyN:"Every N pages",ranges:"Custom ranges"},
+    splitEveryLabel:"Every:",splitEveryUnit:"pages",
+    splitRangeLabel:"Page ranges (e.g. 1-3, 4, 5-8):",splitRangeHint:"Each range exports to a separate file.",
+    splitModeDescs:{each:"Each page exported as a separate file.",everyN:"PDF split into N-page chunks.",ranges:"Define ranges manually, each gives a file."},
+    wmPositions:{diagonal:"Diagonal",center:"Center",topLeft:"Top left",bottomRight:"Bottom right"},
+    encAlgos:{'aes-128':{label:"AES-128",badge:"PDF 1.6",desc:"AES 128-bit. General use. Adobe Reader 7+."},'aes-256':{label:"AES-256",badge:"PDF 1.7",desc:"AES 256-bit. Highest level. All modern readers."}},
+    pwdStrengths:["Very weak","Weak","Fair","Strong","Very strong"],
+    pepperTitle:"Pepper (password hardening)",pepperDesc:"Secret string added to the password before encryption.",
+    pepperModeManual:"Manual",pepperModeAuto:"Auto-generated",pepperGenBtn:"↻ Regenerate",
+    pepperAutoHint:"⚠️ Note this value — required to open the PDF.",
+    pepperPreview:(pwd,p)=>p?`Key = "${p}" + "${pwd}" = "${p}${pwd}"`:'',
+    permTitle:"User permissions",permissions:{printing:"Printing",copying:"Copy text",modifying:"Modifying",annotations:"Annotations"},
+    pwdHint:"Password + pepper are combined before encryption. Keep both safe.",
+    ocrResultLabel:"Extracted text:",ocrCopyBtn:"\U0001f4cb Copy",ocrSaveBtn:"\U0001f4be Save .txt",ocrSavePdfBtn:"\U0001f4c4 Export PDF",
+    ocrLangNote:"OCR via Tesseract.js (~8\u00a0MB on first load).",
+    wmPreviewLabel:"Preview",
+    cropApplyLabel:"Apply to:",
+    cropApplyModes:{all:"All pages",single:"Specific page"},
+    cropPageLabel:"Page:",
+    cropDrawHint:"Draw a rectangle on the preview to define the area to keep. Drag the handles to adjust.",
+    cropCoordsLabel:"Kept area:",
+    cropResetBtn:"\u21BA Reset",
+    cropPreviewLabel:"Interactive preview \u2014 blue area = kept area",
+    cropPreviewPlaceholder:"Load a PDF to see the preview",
+    successCrop:(name)=>`"${name}" cropped.`,
+    successRedact:(name,n)=>`"${name}" \u2014 ${n} zone${n>1?'s':''} redacted.`,
+    redactWarning:"\u26a0\ufe0f Non-secure method: black rectangles visually hide content but do not remove it from the PDF. The original text remains extractable.",
+    redactColorLabel:"Color:",
+    redactPageLabel:"Page:",
+    redactDrawHint:"Draw rectangles on the preview to mark areas to redact.",
+    redactClearBtn:"\U0001f5d1 Clear all zones",
+    errorNoRedactZones:"No redaction zones defined.",
+    htmlPageSzLabel:"Page size:",htmlMgLabel:"Margins:",
+    splitEveryLabel:"Every:",splitEveryUnit:"pages",
+    splitRangeLabel:"Page ranges (e.g. 1-3, 4, 5-8):",
+    splitRangeHint:"Each range exports to a separate file.",
+    btnSelectAll:"Select all",btnSelectNone:"Deselect",btnDelete:"Delete",
+    actionBtn:{pdf:"Merge PDFs",img:"Convert to PDF",txt:"Convert to PDF",html:"Generate PDF",pages:"Export",split:"Split PDF",crop:"Apply crop",redact:"Apply redaction",wm:"Apply watermark",protect:"Protect PDF",ocr:"Run OCR"},
+    progressRead:(n)=>`Reading "${n}"…`,progressConvert:(n)=>`Converting "${n}"…`,
+    progressSplit:(i,n)=>`Part ${i}/${n}…`,progressOcr:(n)=>`OCR page ${n}…`,
+    successPdf:(name,n)=>`"${name}" — ${n} file${n>1?'s':''} merged.`,
+    successImg:(name,n)=>`"${name}" — ${n} image${n>1?'s':''} converted.`,
+    successTxt:(name,n)=>`"${name}" — ${n} file${n>1?'s':''} converted.`,
+    successHtml:(name)=>`"${name}" generated from HTML.`,
+    successPages:(name,n)=>`"${name}" — ${n} page${n>1?'s':''}.`,
+    successSplit:(n)=>`${n} file${n>1?'s':''} downloaded.`,
+    successWm:(name)=>`"${name}" with watermark.`,
+    successProtect:(name)=>`"${name}" protected.`,
+    errorMsg:(m)=>`Error: ${m}`,errorProtected:(n)=>`Cannot read "${n}" — protected?`,
+    errorPwdMismatch:"Passwords do not match.",errorPwdEmpty:"Please enter a password.",
+    errorNoPages:"No pages selected.",errorDeleteAllPages:"Cannot delete all pages.",errorNoCropZone:"Draw a crop zone first.",errorNoHtml:"HTML editor is empty.",
+    errorFileTooLarge:(max)=>`File too large (max ${max}). File ignored.`,
+    errorFileEmpty:"The file is empty and was ignored.",
+    warnFileLarge:(size)=>`Large file (${size}). Processing may be slow.`,
+    errorPasswordRequired:"This PDF is password-protected. Enter the password:",
+    errorPasswordWrong:"Incorrect password, try again:",
+    errorCancelled:"Operation cancelled.",
+    errorTimeout:"Timed out (5 min). The operation was cancelled.",
+    btnCancel:"Cancel",
+    ocrLangLabel:"OCR languages:",
+    progressTesseract:"Loading Tesseract…",
+    htmlFallbackPage:(n)=>`Page ${n} — preview not available in this browser.`,
+    confirmClearAll:"Clear all loaded files?",
+    redactConfirmMsg:"⚠️ Reminder: redaction is visual only.\nThe original text remains in the PDF file.\n\nContinue anyway?",
+    ariaThemeBtn:"Toggle theme", ariaClearAll:"Clear all files",
+    ariaRotate90:"Rotate 90° clockwise", ariaRotateMinus90:"Rotate 90° counter-clockwise",
+    ariaPwdVis:"Show / Hide password",
+    ariaPrevPage:"Previous page", ariaNextPage:"Next page",
+    ariaModalClose:"Close preview",
+    wmPreviewPlaceholderText:"Load a PDF to see the preview on your document",
+    redactPlaceholderText:"Load a PDF to draw redaction zones",
+    filesIgnoredPdf:(n)=>`${n} file(s) ignored: PDFs only.`,
+    filesIgnoredImg:(n)=>`${n} file(s) ignored: unsupported format.`,
+    filesIgnoredTxt:(n)=>`${n} file(s) ignored: .txt only.`,
+    fileCount:(n)=>`${n} file${n>1?'s':''}`,sizeUnits:{o:'B',ko:'KB',mo:'MB'},
+    pageEditorTitle:(n)=>`${n} page${n>1?'s':''}`,closeModal:"✕ Close",
+    pageSizeLabel:"Page size:",fitLabel:"Fit:",compLevelLabel:"Optimisation:",compInfo:"Actual size reduction depends on PDF content.",
+    txtFontSizeLabel:"Font size:",txtPageSzLabel:"Page size:",txtMgLabel:"Margins:",splitModeLabel:"Method:",
+    wmTextLabel:"Text:",wmOpacityLabel:"Opacity:",wmSizeLabel:"Size:",wmColorLabel:"Color:",wmPosLabel:"Position:",
+    encAlgoLabel:"Algorithm:",pwdLabel:"Password:",pwdConfirmLabel:"Confirm:",pwdStrengthLabel:"Strength:",
+    pepperManualLabel:"Value:",pepperAutoLabel:"Value:",removeTitle:"Remove",totalSize:(s)=>`${s} total`,
+    progressInit:"Initializing\u2026",progressGen:"Generating PDF\u2026",progressDl:"Downloading\u2026",
+    progressWm:"Applying watermark\u2026",progressProtect:"Encrypting\u2026",progressPages:"Exporting\u2026",
+    progressHtml:"Rendering HTML\u2026",progressTxt:(n)=>`Converting "${n}"\u2026`,
+    progressCrop:"Cropping\u2026",progressRedact:"Redacting\u2026",
+    successOcr:"OCR complete.",errorRead:"Read error",errorOcrFail:"OCR failed.",
+  },
+  de:{tabs:{pdf:"Zusammenführen",img:"Bilder→PDF",txt:"TXT→PDF",html:"HTML→PDF",pages:"Editor",split:"Teilen",crop:"Zuschneiden",redact:"Schwärzen",wm:"Wasserzeichen",protect:"Schützen",ocr:"OCR"},fitCover:"Füllen",fitContain:"Einpassen",compLevels:["Leicht","Mittel","Stark"],txtFontSizes:{small:"Klein (9pt)",normal:"Normal (11pt)",large:"Groß (14pt)"},txtMarginSizes:{small:"Schmal",normal:"Normal",large:"Breit"},actionBtn:{pdf:"PDFs zusammenführen",img:"In PDF umwandeln",txt:"In PDF umwandeln",html:"PDF generieren",pages:"Exportieren",split:"PDF teilen",crop:"Zuschneiden",redact:"Schwärzen",wm:"Wasserzeichen",protect:"PDF schützen",ocr:"OCR starten"},wmPreviewLabel:"Vorschau",cropApplyLabel:"Anwenden auf:",cropApplyModes:{all:"Alle Seiten",single:"Bestimmte Seite"},cropPageLabel:"Seite:",cropDrawHint:"Zeichnen Sie ein Rechteck auf die Vorschau.",cropCoordsLabel:"Behaltener Bereich:",cropResetBtn:"↺ Zurücksetzen",cropPreviewLabel:"Interaktive Vorschau",cropPreviewPlaceholder:"PDF laden für Vorschau",successCrop:(name)=>`"${name}" zugeschnitten.`,successRedact:(name,n)=>`"${name}" — ${n} Bereich${n>1?"e":""} geschwärzt.`,redactWarning:"⚠️ Unsichere Methode: Die schwarzen Rechtecke verbergen den Inhalt nur visuell.",redactColorLabel:"Farbe:",redactPageLabel:"Seite:",redactDrawHint:"Zeichnen Sie Rechtecke zum Schwärzen.",redactClearBtn:"🗑 Alle löschen",htmlPageSzLabel:"Format:",htmlMgLabel:"Ränder:",sizeUnits:{o:'B',ko:'KB',mo:'MB'},
+    caps:[
+      {dot:'accent',label:'PDF zusammenführen',  desc:'Mehrere PDFs in einer Datei zusammenführen.'},
+      {dot:'blue',  label:'Bilder → PDF',         desc:'JPG, PNG, WebP, GIF, BMP in PDF umwandeln.'},
+      {dot:'teal',  label:'TXT → PDF',            desc:'.txt-Dateien mit automatischer Paginierung in PDF konvertieren.'},
+      {dot:'blue',  label:'HTML → PDF',           desc:'HTML-Code einfügen und als formatiertes PDF exportieren.'},
+      {dot:'green', label:'Seiteneditor',         desc:'Seiten eines PDFs neu anordnen, löschen oder drehen.'},
+      {dot:'pink',  label:'PDF teilen',           desc:'PDF in mehrere Dateien nach Seite oder Bereich aufteilen.'},
+      {dot:'purple',label:'Wasserzeichen',        desc:'Einen Text als Wasserzeichen auf alle Seiten hinzufügen.'},
+      {dot:'orange',label:'Passwortschutz',       desc:'PDF verschlüsseln (AES-128/AES-256).'},
+      {dot:'purple',label:'OCR',                  desc:'Text aus einem gescannten PDF oder Bild extrahieren.'},
+      {dot:'teal',  label:'Zuschneiden',          desc:'Ränder oder einen Bereich zuschneiden, alle Seiten oder einzeln.'},
+      {dot:'green', label:'Schwärzen',       desc:'Bereiche eines PDFs visuell maskieren (unsichere Methode).'},
+    ],
+    subtitle:"Dateien zusammenführen, neu anordnen – 100% offline, keine Datenspeicherung.",
+    capsTitle:"Verfügbare Funktionen",
+    dropTitle:{pdf:"PDF-Dateien hier ablegen",img:"Bilder hier ablegen",txt:".txt-Dateien hier ablegen",html:"HTML-Modus — Editor unten verwenden",pages:"PDF zum Bearbeiten ablegen",split:"PDF zum Teilen ablegen",crop:"PDF zum Zuschneiden ablegen",redact:"PDF zum Schwärzen ablegen",wm:"PDF für Wasserzeichen ablegen",protect:"PDF zum Schützen ablegen",ocr:"PDF oder Bild für OCR ablegen"},
+    dropHint:{pdf:"oder klicken • mehrere Dateien",img:"JPG, PNG, WebP, GIF, BMP",txt:"oder klicken • mehrere .txt-Dateien",html:"(keine Datei erforderlich)",pages:"oder klicken • eine Datei",split:"oder klicken • eine Datei",crop:"oder klicken • eine Datei",redact:"oder klicken • eine Datei",wm:"oder klicken",protect:"oder klicken",ocr:"PDF oder JPG/PNG • eine Datei"},
+    defaultName:{pdf:"zusammengefuehrtes-dokument",img:"konvertierte-bilder",txt:"konvertierter-text",html:"html-export",pages:"bearbeitetes-dokument",split:"teil",crop:"beschnittenes-dokument",redact:"geschwärztes-dokument",wm:"wasserzeichen-dokument",protect:"geschuetztes-dokument",ocr:"extrahierter-text"},
+    optionsLabel:"Dateiname:",placeholder:"dateiname",dragHint:"⠿ Zum Sortieren ziehen",
+    pageSizeLabel:"Format:",fitLabel:"Anpassung:",compLevelLabel:"Komprimierung:",compMeterLabel:"Gesch\u00e4tzte Reduzierung:",
+    txtFontSizeLabel:"Schrift:",txtPageSzLabel:"Format:",txtMgLabel:"R\u00e4nder:",
+    txtPreviewInfo:(f,p)=>`${f} Datei${f>1?"en":""} \u2022 ~${p} Seite${p>1?"n":""} gesch\u00e4tzt`,
+    htmlEditorLabel:"HTML unten einf\u00fcgen oder schreiben:",
+    htmlInfo:"HTML wird in einem unsichtbaren iframe gerendert, jede Seite als Bild erfasst und in das PDF eingef\u00fcgt.",
+    htmlTplBasic:"Basisvorlage",htmlTplTable:"Tabelle",htmlTplLetter:"Brief",
+    splitModeLabel:"Methode:",
+    splitModes:{each:"Jede Seite",everyN:"Alle N Seiten",ranges:"Benutzerdefinierte Bereiche"},
+    splitEveryLabel:"Alle:",splitEveryUnit:"Seiten",
+    splitRangeLabel:"Seitenbereiche (z.\u00a0B. 1-3, 4, 5-8):",splitRangeHint:"Jeder Bereich wird in eine separate Datei exportiert.",
+    splitModeDescs:{each:"Jede Seite wird in eine separate Datei exportiert.",everyN:"Das PDF wird in N-seitige Abschnitte geteilt.",ranges:"Bereiche manuell definieren, jeder ergibt eine Datei."},
+    wmTextLabel:"Text:",wmOpacityLabel:"Deckkraft:",wmSizeLabel:"Gr\u00f6\u00dfe:",wmColorLabel:"Farbe:",wmPosLabel:"Position:",
+    wmPositions:{diagonal:"Diagonal",center:"Zentriert",topLeft:"Oben links",bottomRight:"Unten rechts"},
+    encAlgoLabel:"Algorithmus:",
+    encAlgos:{'aes-128':{label:"AES-128",badge:"PDF 1.6",desc:"AES 128-Bit. Allgemeine Nutzung. Adobe Reader 7+."},'aes-256':{label:"AES-256",badge:"PDF 1.7",desc:"AES 256-Bit. H\u00f6chste Sicherheit. Alle modernen Reader."}},
+    pwdLabel:"Passwort:",pwdConfirmLabel:"Best\u00e4tigen:",pwdStrengthLabel:"St\u00e4rke:",
+    pwdStrengths:["Sehr schwach","Schwach","Mittel","Stark","Sehr stark"],
+    pepperTitle:"Pepper (Passwortvest\u00e4rkung)",pepperDesc:"Geheime Zeichenkette, die vor der Verschl\u00fcsselung zum Passwort hinzugef\u00fcgt wird.",
+    pepperModeManual:"Manuell",pepperModeAuto:"Automatisch generiert",
+    pepperManualLabel:"Wert:",pepperAutoLabel:"Wert:",pepperGenBtn:"\u21bb Neu generieren",
+    pepperAutoHint:"\u26a0\ufe0f Diesen Wert notieren \u2014 zum \u00d6ffnen des PDFs erforderlich.",
+    pepperPreview:(pwd,p)=>p?`Schl\u00fcssel = "${p}" + "${pwd}" = "${p}${pwd}"`:'',
+    permTitle:"Benutzerrechte",permissions:{printing:"Drucken",copying:"Text kopieren",modifying:"Bearbeiten",annotations:"Anmerkungen"},
+    pwdHint:"Passwort + Pepper werden vor der Verschl\u00fcsselung kombiniert. Beide sicher aufbewahren.",
+    ocrResultLabel:"Extrahierter Text:",ocrCopyBtn:"\U0001f4cb Kopieren",ocrSaveBtn:"\U0001f4be Als .txt speichern",ocrSavePdfBtn:"\U0001f4c4 Als PDF exportieren",
+    ocrLangNote:"OCR via Tesseract.js (~8\u00a0MB beim ersten Laden). Sprachen: Franz\u00f6sisch, Englisch, Deutsch.",
+    pageEditorTitle:(n)=>`${n} Seite${n>1?"n":""}`,
+    btnSelectAll:"Alle ausw\u00e4hlen",btnSelectNone:"Abw\u00e4hlen",btnDelete:"L\u00f6schen",
+    progressInit:"Initialisierung\u2026",progressRead:(n)=>`"${n}" lesen\u2026`,
+    progressConvert:(n)=>`"${n}" konvertieren\u2026`,progressGen:"PDF wird erstellt\u2026",
+    progressDl:"Herunterladen\u2026",progressWm:"Wasserzeichen wird angewendet\u2026",
+    progressProtect:"Verschl\u00fcsselung\u2026",progressPages:"Exportieren\u2026",
+    progressSplit:(i,n)=>`Teil ${i}/${n}\u2026`,progressOcr:(n)=>`OCR Seite ${n}\u2026`,
+    progressHtml:"HTML wird gerendert\u2026",progressTxt:(n)=>`"${n}" konvertieren\u2026`,
+    progressCrop:"Zuschneiden\u2026",progressRedact:"Schw\u00e4rzen\u2026",
+    successPdf:(name,n)=>`"${name}" \u2014 ${n} Datei${n>1?"en":""} zusammengef\u00fchrt.`,
+    successImg:(name,n)=>`"${name}" \u2014 ${n} Bild${n>1?"er":""} konvertiert.`,
+    successTxt:(name,n)=>`"${name}" \u2014 ${n} Datei${n>1?"en":""} konvertiert.`,
+    successHtml:(name)=>`"${name}" aus HTML erstellt.`,
+    successPages:(name,n)=>`"${name}" \u2014 ${n} Seite${n>1?"n":""}.`,
+    successSplit:(n)=>`${n} Datei${n>1?"en":""} heruntergeladen.`,
+    successWm:(name)=>`"${name}" mit Wasserzeichen.`,successProtect:(name)=>`"${name}" gesch\u00fctzt.`,
+    successOcr:"OCR abgeschlossen.",
+    errorNoRedactZones:"Keine Schw\u00e4rzungsbereiche definiert.",
+    errorMsg:(m)=>`Fehler: ${m}`,errorProtected:(n)=>`"${n}" kann nicht gelesen werden \u2014 gesch\u00fctzt?`,
+    errorRead:"Lesefehler",errorPwdMismatch:"Passw\u00f6rter stimmen nicht \u00fcberein.",
+    errorPwdEmpty:"Bitte Passwort eingeben.",errorNoPages:"Keine Seite ausgew\u00e4hlt.",
+    errorDeleteAllPages:"Alle Seiten k\u00f6nnen nicht gel\u00f6scht werden.",
+    errorNoCropZone:"Zuschneidungsbereich definieren.",
+    errorNoHtml:"HTML-Editor ist leer.",errorOcrFail:"OCR fehlgeschlagen.",
+    filesIgnoredPdf:(n)=>`${n} Datei(en) ignoriert: Nur PDFs.`,
+    filesIgnoredImg:(n)=>`${n} Datei(en) ignoriert: Nicht unterst\u00fctztes Format.`,
+    filesIgnoredTxt:(n)=>`${n} Datei(en) ignoriert: Nur .txt.`,
+    fileCount:(n)=>`${n} Datei${n>1?"en":""}`,totalSize:(s)=>`${s} gesamt`,
+    removeTitle:"Entfernen",closeModal:"\u2715 Schlie\u00dfen",
+    cropDrawHint:"Zeichnen Sie ein Rechteck auf die Vorschau, um den zu behaltenden Bereich festzulegen. Griffe ziehen zum Anpassen.",
+    redactWarning:"\u26a0\ufe0f Unsichere Methode: Die schwarzen Rechtecke verbergen den Inhalt nur visuell, entfernen ihn aber nicht aus der PDF-Datei. Der Originaltext bleibt extrahierbar.",
+    redactDrawHint:"Zeichnen Sie Rechtecke auf die Vorschau, um Bereiche zum Schw\u00e4rzen zu markieren.",
+  },
+  zh:{tabs:{pdf:"合并PDF",img:"图片→PDF",txt:"TXT→PDF",html:"HTML→PDF",pages:"编辑器",split:"拆分",crop:"裁剪",redact:"遮盖",wm:"水印",protect:"加密",ocr:"OCR"},fitCover:"填充",fitContain:"适应",compLevels:["轻度","中度","重度"],txtFontSizes:{small:"小 (9pt)",normal:"正常 (11pt)",large:"大 (14pt)"},txtMarginSizes:{small:"窄",normal:"正常",large:"宽"},actionBtn:{pdf:"合并PDF",img:"转换为PDF",txt:"转换为PDF",html:"生成PDF",pages:"导出",split:"拆分PDF",crop:"裁剪PDF",redact:"遮盖内容",wm:"应用水印",protect:"加密PDF",ocr:"运行OCR"},wmPreviewLabel:"预览",cropApplyLabel:"应用到：",cropApplyModes:{all:"所有页面",single:"特定页面"},cropPageLabel:"页：",cropDrawHint:"在预览上绘制矩形以定义保留区域。",cropCoordsLabel:"保留区域：",cropResetBtn:"↺ 重置",cropPreviewLabel:"交互式预览",cropPreviewPlaceholder:"加载PDF以查看预览",successCrop:(name)=>`"${name}"已裁剪。`,successRedact:(name,n)=>`"${name}" — 已遮盖${n}个区域。`,redactWarning:"⚠️ 非安全方式：黑色矩形仅在视觉上隐藏内容，不会从 PDF 中删除。",redactColorLabel:"颜色：",redactPageLabel:"页：",redactDrawHint:"在预览上绘制矩形以标记遮盖区域。",redactClearBtn:"🗑 清除所有区域",htmlPageSzLabel:"页面大小：",htmlMgLabel:"页边距：",sizeUnits:{o:'B',ko:'KB',mo:'MB'},
+    caps:[
+      {dot:'accent',label:'合并 PDF',    desc:'将多个PDF合并为一个文件，按您选择的顺序。'},
+      {dot:'blue',  label:'图片 → PDF',  desc:'将 JPG、PNG、WebP、GIF、BMP 转换为 PDF。'},
+      {dot:'teal',  label:'TXT → PDF',  desc:'将 .txt 文件转换为 PDF，自动分页。'},
+      {dot:'blue',  label:'HTML → PDF', desc:'粘贴 HTML 代码并导出为格式化 PDF。'},
+      {dot:'green', label:'页面编辑器', desc:'重新排序、删除或旋转 PDF 的页面。'},
+      {dot:'pink',  label:'拆分 PDF',   desc:'按页面或范围将 PDF 拆分为多个文件。'},
+      {dot:'purple',label:'水印',       desc:'在所有页面上添加文字水印。'},
+      {dot:'orange',label:'密码保护',   desc:'加密您的 PDF（AES-128/AES-256）。'},
+      {dot:'purple',label:'OCR',        desc:'从扫描的 PDF 或图像中提取文本。'},
+      {dot:'teal',  label:'裁剪',       desc:'裁剪边距或自定义区域，所有页面或逐页。'},
+      {dot:'green', label:'遮盖',       desc:'在 PDF 的区域上添加视觉遮盖（非安全方式）。'},
+    ],
+    subtitle:"拖拽、重排、100% 离线，不收集任何数据。",
+    capsTitle:"可用功能",
+    dropTitle:{pdf:"将PDF文件拖放至此",img:"将图片拖放至此",txt:"将.txt文件拖放至此",html:"HTML模式 — 使用下方编辑器",pages:"拖放PDF进行编辑",split:"拖放PDF进行拆分",crop:"拖放PDF进行裁剪",redact:"拖放PDF进行遮盖",wm:"拖放PDF添加水印",protect:"拖放PDF进行保护",ocr:"拖放PDF或图片进行OCR"},
+    dropHint:{pdf:"或点击 • 多个文件",img:"JPG, PNG, WebP, GIF, BMP",txt:"或点击 • 多个.txt文件",html:"（无需文件）",pages:"或点击 • 单个文件",split:"或点击 • 单个文件",crop:"或点击 • 单个文件",redact:"或点击 • 单个文件",wm:"或点击",protect:"或点击",ocr:"PDF或JPG/PNG • 单个文件"},
+    defaultName:{pdf:"合并文档",img:"转换图片",txt:"转换文本",html:"html导出",pages:"编辑文档",split:"部分",crop:"裁剪文档",redact:"遮盖文档",wm:"水印文档",protect:"保护文档",ocr:"提取文本"},
+    optionsLabel:"文件名：",placeholder:"文件名",dragHint:"⠿ 拖动排序",
+    pageSizeLabel:"页面大小：",fitLabel:"填充方式：",compLevelLabel:"压缩：",compMeterLabel:"预计压缩率：",
+    txtFontSizeLabel:"字体大小：",txtPageSzLabel:"页面大小：",txtMgLabel:"页边距：",
+    txtPreviewInfo:(f,p)=>`${f} 个文件 \u2022 预计 ~${p} 页`,
+    htmlEditorLabel:"在下方粘贴或编写HTML：",
+    htmlInfo:"HTML在隐藏的iframe中渲染，每页作为图像捕获并插入PDF。",
+    htmlTplBasic:"基本模板",htmlTplTable:"表格",htmlTplLetter:"信件",
+    splitModeLabel:"方式：",
+    splitModes:{each:"每页",everyN:"每N页",ranges:"自定义范围"},
+    splitEveryLabel:"每：",splitEveryUnit:"页",
+    splitRangeLabel:"页面范围（如 1-3, 4, 5-8）：",splitRangeHint:"每个范围导出为单独文件。",
+    splitModeDescs:{each:"每页导出为单独文件。",everyN:"PDF拆分为N页的块。",ranges:"手动定义范围，每个范围生成一个文件。"},
+    wmTextLabel:"文字：",wmOpacityLabel:"不透明度：",wmSizeLabel:"大小：",wmColorLabel:"颜色：",wmPosLabel:"位置：",
+    wmPositions:{diagonal:"对角线",center:"居中",topLeft:"左上",bottomRight:"右下"},
+    encAlgoLabel:"算法：",
+    encAlgos:{'aes-128':{label:"AES-128",badge:"PDF 1.6",desc:"AES 128位。通用。Adobe Reader 7+。"},'aes-256':{label:"AES-256",badge:"PDF 1.7",desc:"AES 256位。最高安全级别。所有现代阅读器。"}},
+    pwdLabel:"密码：",pwdConfirmLabel:"确认：",pwdStrengthLabel:"强度：",
+    pwdStrengths:["非常弱","弱","一般","强","非常强"],
+    pepperTitle:"Pepper（密码强化）",pepperDesc:"在加密前添加到密码的秘密字符串。",
+    pepperModeManual:"手动",pepperModeAuto:"自动生成",
+    pepperManualLabel:"值：",pepperAutoLabel:"值：",pepperGenBtn:"\u21bb 重新生成",
+    pepperAutoHint:"\u26a0\ufe0f 请记录此值 \u2014 打开PDF时需要。",
+    pepperPreview:(pwd,p)=>p?`密钥 = "${p}" + "${pwd}" = "${p}${pwd}"`:'',
+    permTitle:"用户权限",permissions:{printing:"打印",copying:"复制文本",modifying:"修改",annotations:"注释"},
+    pwdHint:"密码 + pepper在加密前合并。请妥善保管两者。",
+    ocrResultLabel:"提取的文本：",ocrCopyBtn:"\U0001f4cb 复制",ocrSaveBtn:"\U0001f4be 保存.txt",ocrSavePdfBtn:"\U0001f4c4 导出PDF",
+    ocrLangNote:"OCR通过Tesseract.js（首次加载约8\u00a0MB）。语言：法语、英语、德语。",
+    pageEditorTitle:(n)=>`${n} 页`,
+    btnSelectAll:"全选",btnSelectNone:"取消选择",btnDelete:"删除",
+    progressInit:"初始化中\u2026",progressRead:(n)=>`正在读取"${n}"\u2026`,
+    progressConvert:(n)=>`正在转换"${n}"\u2026`,progressGen:"正在生成PDF\u2026",
+    progressDl:"正在下载\u2026",progressWm:"正在应用水印\u2026",
+    progressProtect:"正在加密\u2026",progressPages:"正在导出\u2026",
+    progressSplit:(i,n)=>`第${i}/${n}部分\u2026`,progressOcr:(n)=>`OCR第${n}页\u2026`,
+    progressHtml:"正在渲染HTML\u2026",progressTxt:(n)=>`正在转换"${n}"\u2026`,
+    progressCrop:"正在裁剪\u2026",progressRedact:"正在遮盖\u2026",
+    successPdf:(name,n)=>`"${name}" \u2014 已合并${n}个文件。`,
+    successImg:(name,n)=>`"${name}" \u2014 已转换${n}张图片。`,
+    successTxt:(name,n)=>`"${name}" \u2014 已转换${n}个文件。`,
+    successHtml:(name)=>`"${name}"已从HTML生成。`,
+    successPages:(name,n)=>`"${name}" \u2014 共${n}页。`,
+    successSplit:(n)=>`已下载${n}个文件。`,
+    successWm:(name)=>`"${name}"已添加水印。`,successProtect:(name)=>`"${name}"已保护。`,
+    successOcr:"OCR完成。",
+    errorNoRedactZones:"未定义遮盖区域。",
+    errorMsg:(m)=>`错误：${m}`,errorProtected:(n)=>`无法读取"${n}" \u2014 已加密？`,
+    errorRead:"读取错误",errorPwdMismatch:"密码不匹配。",
+    errorPwdEmpty:"请输入密码。",errorNoPages:"未选择页面。",
+    errorDeleteAllPages:"无法删除所有页面。",errorNoCropZone:"请先绘制裁剪区域。",
+    errorNoHtml:"HTML编辑器为空。",errorOcrFail:"OCR失败。",
+    filesIgnoredPdf:(n)=>`${n}个文件被忽略：仅支持PDF。`,
+    filesIgnoredImg:(n)=>`${n}个文件被忽略：不支持的格式。`,
+    filesIgnoredTxt:(n)=>`${n}个文件被忽略：仅支持.txt。`,
+    fileCount:(n)=>`${n}个文件`,totalSize:(s)=>`共${s}`,
+    removeTitle:"移除",closeModal:"\u2715 关闭",
+    cropDrawHint:"在预览上绘制矩形以定义保留区域。拖动手柄进行调整。",
+    redactWarning:"\u26a0\ufe0f 非安全方式：黑色矩形仅在视觉上隐藏内容，不会从PDF中删除。原始文本仍可提取，请勿用于保护敏感数据。",
+    redactDrawHint:"在预览上绘制矩形以标记需要遮盖的区域。",
+  },
+  it:{tabs:{pdf:"Unisci",img:"Immagini→PDF",txt:"TXT→PDF",html:"HTML→PDF",pages:"Editor",split:"Dividi",crop:"Ritaglia",redact:"Oscura",wm:"Filigrana",protect:"Proteggi",ocr:"OCR"},fitCover:"Riempi",fitContain:"Adatta",compLevels:["Leggera","Media","Forte"],txtFontSizes:{small:"Piccolo (9pt)",normal:"Normale (11pt)",large:"Grande (14pt)"},txtMarginSizes:{small:"Stretti",normal:"Normali",large:"Ampi"},actionBtn:{pdf:"Unisci PDF",img:"Converti in PDF",txt:"Converti in PDF",html:"Genera PDF",pages:"Esporta",split:"Dividi PDF",crop:"Ritaglia PDF",redact:"Oscura PDF",wm:"Applica filigrana",protect:"Proteggi PDF",ocr:"Avvia OCR"},wmPreviewLabel:"Anteprima",cropApplyLabel:"Applica a:",cropApplyModes:{all:"Tutte le pagine",single:"Pagina specifica"},cropPageLabel:"Pagina:",cropDrawHint:"Disegna un rettangolo sull'anteprima per definire l'area da conservare.",cropCoordsLabel:"Area conservata:",cropResetBtn:"↺ Reimposta",cropPreviewLabel:"Anteprima interattiva",cropPreviewPlaceholder:"Carica un PDF per l'anteprima",successCrop:(name)=>`"${name}" ritagliato.`,successRedact:(name,n)=>`"${name}" — ${n} zona${n>1?"e":""} oscurata${n>1?"e":""}.`,redactWarning:"⚠️ Metodo non sicuro: i rettangoli neri nascondono visivamente il contenuto ma non lo rimuovono dal file.",redactColorLabel:"Colore:",redactPageLabel:"Pagina:",redactDrawHint:"Disegna rettangoli per oscurare le aree.",redactClearBtn:"🗑 Cancella tutte le zone",htmlPageSzLabel:"Formato:",htmlMgLabel:"Margini:",sizeUnits:{o:'B',ko:'KB',mo:'MB'},
+    caps:[
+      {dot:'accent',label:'Unisci PDF',       desc:'Combina più PDF in un unico file nell\'ordine scelto.'},
+      {dot:'blue',  label:'Immagini → PDF',   desc:'Converti JPG, PNG, WebP, GIF, BMP in PDF.'},
+      {dot:'teal',  label:'TXT → PDF',        desc:'Converti file .txt in PDF con paginazione automatica.'},
+      {dot:'blue',  label:'HTML → PDF',       desc:'Incolla codice HTML ed esportalo come PDF formattato.'},
+      {dot:'green', label:'Editor pagine',    desc:'Riordina, elimina o ruota le pagine di un PDF.'},
+      {dot:'pink',  label:'Dividi PDF',       desc:'Dividi un PDF in più file per pagina o intervallo.'},
+      {dot:'purple',label:'Filigrana',        desc:'Aggiungi una filigrana di testo a tutte le pagine.'},
+      {dot:'orange',label:'Proteggi con password', desc:'Cifra il tuo PDF (AES-128/AES-256).'},
+      {dot:'purple',label:'OCR',              desc:'Estrai testo da un PDF scansionato o un\'immagine.'},
+      {dot:'teal',  label:'Ritaglia',         desc:'Ritaglia i margini o un\'area personalizzata, tutte le pagine o singole.'},
+      {dot:'green', label:'Oscura',           desc:'Maschera visivamente aree di un PDF (metodo non sicuro).'},
+    ],
+    subtitle:"Trascina, riordina, 100% offline, nessuna raccolta dati.",
+    capsTitle:"Funzionalit\u00e0 disponibili",
+    dropTitle:{pdf:"Trascina i tuoi file PDF qui",img:"Trascina le tue immagini qui",txt:"Trascina i tuoi file .txt qui",html:"Modalit\u00e0 HTML \u2014 usa l'editor qui sotto",pages:"Trascina un PDF per riordinarlo",split:"Trascina un PDF per dividerlo",crop:"Trascina un PDF per ritagliarlo",redact:"Trascina un PDF per oscurarlo",wm:"Trascina un PDF per la filigrana",protect:"Trascina un PDF per proteggerlo",ocr:"Trascina un PDF o immagine per l'OCR"},
+    dropHint:{pdf:"o clicca \u2022 pi\u00f9 file",img:"JPG, PNG, WebP, GIF, BMP",txt:"o clicca \u2022 pi\u00f9 file .txt",html:"(nessun file necessario)",pages:"o clicca \u2022 un file",split:"o clicca \u2022 un file",crop:"o clicca \u2022 un file",redact:"o clicca \u2022 un file",wm:"o clicca",protect:"o clicca",ocr:"PDF o JPG/PNG \u2022 un file"},
+    defaultName:{pdf:"documento-unito",img:"immagini-convertite",txt:"testo-convertito",html:"html-esportato",pages:"documento-modificato",split:"parte",crop:"documento-ritagliato",redact:"documento-oscurato",wm:"documento-filigrana",protect:"documento-protetto",ocr:"testo-estratto"},
+    optionsLabel:"Nome file:",placeholder:"nome-file",dragHint:"⠿ Trascina per riordinare",
+    pageSizeLabel:"Formato:",fitLabel:"Adattamento:",compLevelLabel:"Compressione:",compMeterLabel:"Riduzione stimata:",
+    txtFontSizeLabel:"Carattere:",txtPageSzLabel:"Formato:",txtMgLabel:"Margini:",
+    txtPreviewInfo:(f,p)=>`${f} file \u2022 ~${p} pagina${p>1?"e":"i"} stimate`,
+    htmlEditorLabel:"Incolla o scrivi il tuo HTML qui sotto:",
+    htmlInfo:"L'HTML viene renderizzato in un iframe nascosto, ogni pagina catturata come immagine e inserita nel PDF.",
+    htmlTplBasic:"Template base",htmlTplTable:"Tabella",htmlTplLetter:"Lettera",
+    splitModeLabel:"Metodo:",
+    splitModes:{each:"Ogni pagina",everyN:"Ogni N pagine",ranges:"Intervalli personalizzati"},
+    splitEveryLabel:"Ogni:",splitEveryUnit:"pagine",
+    splitRangeLabel:"Intervalli pagine (es. 1-3, 4, 5-8):",splitRangeHint:"Ogni intervallo viene esportato in un file separato.",
+    splitModeDescs:{each:"Ogni pagina esportata in un file separato.",everyN:"PDF diviso in blocchi di N pagine.",ranges:"Definisci gli intervalli manualmente, ciascuno d\u00e0 un file."},
+    wmTextLabel:"Testo:",wmOpacityLabel:"Opacit\u00e0:",wmSizeLabel:"Dimensione:",wmColorLabel:"Colore:",wmPosLabel:"Posizione:",
+    wmPositions:{diagonal:"Diagonale",center:"Centro",topLeft:"In alto a sinistra",bottomRight:"In basso a destra"},
+    encAlgoLabel:"Algoritmo:",
+    encAlgos:{'aes-128':{label:"AES-128",badge:"PDF 1.6",desc:"AES 128-bit. Uso generale. Adobe Reader 7+."},'aes-256':{label:"AES-256",badge:"PDF 1.7",desc:"AES 256-bit. Massima sicurezza. Tutti i lettori moderni."}},
+    pwdLabel:"Password:",pwdConfirmLabel:"Conferma:",pwdStrengthLabel:"Forza:",
+    pwdStrengths:["Molto debole","Debole","Sufficiente","Forte","Molto forte"],
+    pepperTitle:"Pepper (rafforzamento password)",pepperDesc:"Stringa segreta aggiunta alla password prima della cifratura.",
+    pepperModeManual:"Manuale",pepperModeAuto:"Generato automaticamente",
+    pepperManualLabel:"Valore:",pepperAutoLabel:"Valore:",pepperGenBtn:"\u21bb Rigenera",
+    pepperAutoHint:"\u26a0\ufe0f Annota questo valore \u2014 necessario per aprire il PDF.",
+    pepperPreview:(pwd,p)=>p?`Chiave = "${p}" + "${pwd}" = "${p}${pwd}"`:'',
+    permTitle:"Permessi utente",permissions:{printing:"Stampa",copying:"Copia testo",modifying:"Modifica",annotations:"Annotazioni"},
+    pwdHint:"Password + pepper vengono combinati prima della cifratura. Conserva entrambi.",
+    ocrResultLabel:"Testo estratto:",ocrCopyBtn:"\U0001f4cb Copia",ocrSaveBtn:"\U0001f4be Salva .txt",ocrSavePdfBtn:"\U0001f4c4 Esporta PDF",
+    ocrLangNote:"OCR tramite Tesseract.js (~8\u00a0MB al primo caricamento). Lingue: francese, inglese, tedesco.",
+    pageEditorTitle:(n)=>`${n} pagina${n>1?"e":""}`,
+    btnSelectAll:"Seleziona tutto",btnSelectNone:"Deseleziona",btnDelete:"Elimina",
+    progressInit:"Inizializzazione\u2026",progressRead:(n)=>`Lettura di "${n}"\u2026`,
+    progressConvert:(n)=>`Conversione di "${n}"\u2026`,progressGen:"Generazione PDF\u2026",
+    progressDl:"Download\u2026",progressWm:"Applicazione filigrana\u2026",
+    progressProtect:"Cifratura\u2026",progressPages:"Esportazione\u2026",
+    progressSplit:(i,n)=>`Parte ${i}/${n}\u2026`,progressOcr:(n)=>`OCR pagina ${n}\u2026`,
+    progressHtml:"Rendering HTML\u2026",progressTxt:(n)=>`Conversione di "${n}"\u2026`,
+    progressCrop:"Ritaglio\u2026",progressRedact:"Oscuramento\u2026",
+    successPdf:(name,n)=>`"${name}" \u2014 ${n} file uniti.`,
+    successImg:(name,n)=>`"${name}" \u2014 ${n} immagine${n>1?"i":""} convertita${n>1?"e":"i"}.`,
+    successTxt:(name,n)=>`"${name}" \u2014 ${n} file convertiti.`,
+    successHtml:(name)=>`"${name}" generato da HTML.`,
+    successPages:(name,n)=>`"${name}" \u2014 ${n} pagina${n>1?"e":"i"}.`,
+    successSplit:(n)=>`${n} file scaricati.`,
+    successWm:(name)=>`"${name}" con filigrana.`,successProtect:(name)=>`"${name}" protetto.`,
+    successOcr:"OCR completato.",
+    errorNoRedactZones:"Nessuna zona di oscuramento definita.",
+    errorMsg:(m)=>`Errore: ${m}`,errorProtected:(n)=>`Impossibile leggere "${n}" \u2014 protetto?`,
+    errorRead:"Errore di lettura",errorPwdMismatch:"Le password non corrispondono.",
+    errorPwdEmpty:"Inserisci una password.",errorNoPages:"Nessuna pagina selezionata.",
+    errorDeleteAllPages:"Impossibile eliminare tutte le pagine.",
+    errorNoCropZone:"Definisci prima un'area di ritaglio.",
+    errorNoHtml:"L'editor HTML \u00e8 vuoto.",errorOcrFail:"OCR non riuscito.",
+    filesIgnoredPdf:(n)=>`${n} file ignorati: solo PDF.`,
+    filesIgnoredImg:(n)=>`${n} file ignorati: formato non supportato.`,
+    filesIgnoredTxt:(n)=>`${n} file ignorati: solo .txt.`,
+    fileCount:(n)=>`${n} file`,totalSize:(s)=>`${s} totale`,
+    removeTitle:"Rimuovi",closeModal:"\u2715 Chiudi",
+    cropDrawHint:"Disegna un rettangolo sull'anteprima per definire l'area da conservare. Trascina i punti di controllo per regolare.",
+    redactWarning:"\u26a0\ufe0f Metodo non sicuro: i rettangoli neri nascondono visivamente il contenuto ma non lo rimuovono dal file. Il testo originale resta estraibile.",
+    redactDrawHint:"Disegna rettangoli sull'anteprima per marcare le aree da oscurare.",
+  },
+  es:{tabs:{pdf:"Fusionar",img:"Imágenes→PDF",txt:"TXT→PDF",html:"HTML→PDF",pages:"Editor",split:"Dividir",crop:"Recortar",redact:"Censurar",wm:"Marca agua",protect:"Proteger",ocr:"OCR"},fitCover:"Rellenar",fitContain:"Contener",compLevels:["Ligera","Media","Fuerte"],txtFontSizes:{small:"Pequeño (9pt)",normal:"Normal (11pt)",large:"Grande (14pt)"},txtMarginSizes:{small:"Estrechos",normal:"Normales",large:"Amplios"},actionBtn:{pdf:"Fusionar PDF",img:"Convertir a PDF",txt:"Convertir a PDF",html:"Generar PDF",pages:"Exportar",split:"Dividir PDF",crop:"Recortar PDF",redact:"Censurar PDF",wm:"Aplicar marca",protect:"Proteger PDF",ocr:"Ejecutar OCR"},wmPreviewLabel:"Vista previa",cropApplyLabel:"Aplicar a:",cropApplyModes:{all:"Todas las páginas",single:"Página específica"},cropPageLabel:"Página:",cropDrawHint:"Dibuja un rectángulo en la vista previa para definir el área a conservar.",cropCoordsLabel:"Área conservada:",cropResetBtn:"↺ Restablecer",cropPreviewLabel:"Vista previa interactiva",cropPreviewPlaceholder:"Carga un PDF para ver la vista previa",successCrop:(name)=>`"${name}" recortado.`,successRedact:(name,n)=>`"${name}" — ${n} zona${n>1?"s":""} censurada${n>1?"s":""}.`,redactWarning:"⚠️ Método no seguro: los rectángulos negros ocultan visualmente el contenido pero no lo eliminan del archivo.",redactColorLabel:"Color:",redactPageLabel:"Página:",redactDrawHint:"Dibuja rectángulos para marcar las áreas a censurar.",redactClearBtn:"🗑 Borrar todas las zonas",htmlPageSzLabel:"Tamaño:",htmlMgLabel:"Márgenes:",sizeUnits:{o:'B',ko:'KB',mo:'MB'},
+    caps:[
+      {dot:'accent',label:'Fusionar PDF',       desc:'Combina varios PDFs en un archivo en el orden elegido.'},
+      {dot:'blue',  label:'Imágenes → PDF',     desc:'Convierte JPG, PNG, WebP, GIF, BMP a PDF.'},
+      {dot:'teal',  label:'TXT → PDF',          desc:'Convierte archivos .txt a PDF con paginación automática.'},
+      {dot:'blue',  label:'HTML → PDF',         desc:'Pega código HTML y expórtalo como PDF formateado.'},
+      {dot:'green', label:'Editor de páginas',  desc:'Reordena, elimina o rota páginas de un PDF.'},
+      {dot:'pink',  label:'Dividir PDF',        desc:'Divide un PDF en varios archivos por página o rango.'},
+      {dot:'purple',label:'Marca de agua',      desc:'Añade una marca de agua de texto a todas las páginas.'},
+      {dot:'orange',label:'Proteger con contraseña', desc:'Cifra tu PDF (AES-128/AES-256).'},
+      {dot:'purple',label:'OCR',                desc:'Extrae texto de un PDF escaneado o una imagen.'},
+      {dot:'teal',  label:'Recortar',           desc:'Recorta márgenes o una zona personalizada, todas las páginas o página a página.'},
+      {dot:'green', label:'Censurar',           desc:'Enmascara visualmente zonas de un PDF (método no seguro).'},
+    ],
+    subtitle:"Arrastra, reordena, 100% offline, sin recogida de datos.",
+    capsTitle:"Funciones disponibles",
+    dropTitle:{pdf:"Arrastra tus archivos PDF aqu\u00ed",img:"Arrastra tus im\u00e1genes aqu\u00ed",txt:"Arrastra tus archivos .txt aqu\u00ed",html:"Modo HTML \u2014 usa el editor de abajo",pages:"Arrastra un PDF para reordenar",split:"Arrastra un PDF para dividir",crop:"Arrastra un PDF para recortar",redact:"Arrastra un PDF para censurar",wm:"Arrastra un PDF para la marca de agua",protect:"Arrastra un PDF para proteger",ocr:"Arrastra un PDF o imagen para OCR"},
+    dropHint:{pdf:"o haz clic \u2022 varios archivos",img:"JPG, PNG, WebP, GIF, BMP",txt:"o haz clic \u2022 varios archivos .txt",html:"(no se necesita archivo)",pages:"o haz clic \u2022 un archivo",split:"o haz clic \u2022 un archivo",crop:"o haz clic \u2022 un archivo",redact:"o haz clic \u2022 un archivo",wm:"o haz clic",protect:"o haz clic",ocr:"PDF o JPG/PNG \u2022 un archivo"},
+    defaultName:{pdf:"documento-fusionado",img:"imagenes-convertidas",txt:"texto-convertido",html:"html-exportado",pages:"documento-editado",split:"parte",crop:"documento-recortado",redact:"documento-censurado",wm:"documento-marca-agua",protect:"documento-protegido",ocr:"texto-extraido"},
+    optionsLabel:"Nombre de archivo:",placeholder:"nombre-archivo",dragHint:"⠿ Arrastrar para reordenar",
+    pageSizeLabel:"Tama\u00f1o:",fitLabel:"Ajuste:",compLevelLabel:"Compresi\u00f3n:",compMeterLabel:"Reducci\u00f3n estimada:",
+    txtFontSizeLabel:"Fuente:",txtPageSzLabel:"Tama\u00f1o:",txtMgLabel:"M\u00e1rgenes:",
+    txtPreviewInfo:(f,p)=>`${f} archivo${f>1?"s":""} \u2022 ~${p} p\u00e1gina${p>1?"s":""} estimadas`,
+    htmlEditorLabel:"Pega o escribe tu HTML a continuaci\u00f3n:",
+    htmlInfo:"El HTML se renderiza en un iframe oculto, cada p\u00e1gina capturada como imagen e insertada en el PDF.",
+    htmlTplBasic:"Plantilla b\u00e1sica",htmlTplTable:"Tabla",htmlTplLetter:"Carta",
+    splitModeLabel:"M\u00e9todo:",
+    splitModes:{each:"Cada p\u00e1gina",everyN:"Cada N p\u00e1ginas",ranges:"Rangos personalizados"},
+    splitEveryLabel:"Cada:",splitEveryUnit:"p\u00e1ginas",
+    splitRangeLabel:"Rangos de p\u00e1ginas (ej. 1-3, 4, 5-8):",splitRangeHint:"Cada rango se exporta en un archivo separado.",
+    splitModeDescs:{each:"Cada p\u00e1gina exportada en un archivo separado.",everyN:"PDF dividido en bloques de N p\u00e1ginas.",ranges:"Define los rangos manualmente, cada uno genera un archivo."},
+    wmTextLabel:"Texto:",wmOpacityLabel:"Opacidad:",wmSizeLabel:"Tama\u00f1o:",wmColorLabel:"Color:",wmPosLabel:"Posici\u00f3n:",
+    wmPositions:{diagonal:"Diagonal",center:"Centro",topLeft:"Arriba izquierda",bottomRight:"Abajo derecha"},
+    encAlgoLabel:"Algoritmo:",
+    encAlgos:{'aes-128':{label:"AES-128",badge:"PDF 1.6",desc:"AES 128 bits. Uso general. Adobe Reader 7+."},'aes-256':{label:"AES-256",badge:"PDF 1.7",desc:"AES 256 bits. M\u00e1xima seguridad. Todos los lectores modernos."}},
+    pwdLabel:"Contrase\u00f1a:",pwdConfirmLabel:"Confirmar:",pwdStrengthLabel:"Fuerza:",
+    pwdStrengths:["Muy d\u00e9bil","D\u00e9bil","Regular","Fuerte","Muy fuerte"],
+    pepperTitle:"Pepper (refuerzo de contrase\u00f1a)",pepperDesc:"Cadena secreta a\u00f1adida a la contrase\u00f1a antes del cifrado.",
+    pepperModeManual:"Manual",pepperModeAuto:"Generado autom\u00e1ticamente",
+    pepperManualLabel:"Valor:",pepperAutoLabel:"Valor:",pepperGenBtn:"\u21bb Regenerar",
+    pepperAutoHint:"\u26a0\ufe0f Anota este valor \u2014 necesario para abrir el PDF.",
+    pepperPreview:(pwd,p)=>p?`Clave = "${p}" + "${pwd}" = "${p}${pwd}"`:'',
+    permTitle:"Permisos del usuario",permissions:{printing:"Imprimir",copying:"Copiar texto",modifying:"Modificar",annotations:"Anotaciones"},
+    pwdHint:"Contrase\u00f1a + pepper se combinan antes del cifrado. Guarda ambos.",
+    ocrResultLabel:"Texto extra\u00eddo:",ocrCopyBtn:"\U0001f4cb Copiar",ocrSaveBtn:"\U0001f4be Guardar .txt",ocrSavePdfBtn:"\U0001f4c4 Exportar PDF",
+    ocrLangNote:"OCR via Tesseract.js (~8\u00a0MB en la primera carga). Idiomas: franc\u00e9s, ingl\u00e9s, alem\u00e1n.",
+    pageEditorTitle:(n)=>`${n} p\u00e1gina${n>1?"s":""}`,
+    btnSelectAll:"Seleccionar todo",btnSelectNone:"Deseleccionar",btnDelete:"Eliminar",
+    progressInit:"Inicializando\u2026",progressRead:(n)=>`Leyendo "${n}"\u2026`,
+    progressConvert:(n)=>`Convirtiendo "${n}"\u2026`,progressGen:"Generando PDF\u2026",
+    progressDl:"Descargando\u2026",progressWm:"Aplicando marca de agua\u2026",
+    progressProtect:"Cifrando\u2026",progressPages:"Exportando\u2026",
+    progressSplit:(i,n)=>`Parte ${i}/${n}\u2026`,progressOcr:(n)=>`OCR p\u00e1gina ${n}\u2026`,
+    progressHtml:"Renderizando HTML\u2026",progressTxt:(n)=>`Convirtiendo "${n}"\u2026`,
+    progressCrop:"Recortando\u2026",progressRedact:"Censurando\u2026",
+    successPdf:(name,n)=>`"${name}" \u2014 ${n} archivo${n>1?"s":""} fusionados.`,
+    successImg:(name,n)=>`"${name}" \u2014 ${n} imagen${n>1?"es":""} convertida${n>1?"s":""}.`,
+    successTxt:(name,n)=>`"${name}" \u2014 ${n} archivo${n>1?"s":""} convertidos.`,
+    successHtml:(name)=>`"${name}" generado desde HTML.`,
+    successPages:(name,n)=>`"${name}" \u2014 ${n} p\u00e1gina${n>1?"s":""}.`,
+    successSplit:(n)=>`${n} archivo${n>1?"s":""} descargados.`,
+    successWm:(name)=>`"${name}" con marca de agua.`,successProtect:(name)=>`"${name}" protegido.`,
+    successOcr:"OCR completado.",
+    errorNoRedactZones:"No hay zonas de censura definidas.",
+    errorMsg:(m)=>`Error: ${m}`,errorProtected:(n)=>`No se puede leer "${n}" \u2014 \u00bfprotegido?`,
+    errorRead:"Error de lectura",errorPwdMismatch:"Las contrase\u00f1as no coinciden.",
+    errorPwdEmpty:"Por favor, introduce una contrase\u00f1a.",errorNoPages:"No hay p\u00e1ginas seleccionadas.",
+    errorDeleteAllPages:"No se pueden eliminar todas las p\u00e1ginas.",
+    errorNoCropZone:"Define primero una zona de recorte.",
+    errorNoHtml:"El editor HTML est\u00e1 vac\u00edo.",errorOcrFail:"Error en el OCR.",
+    filesIgnoredPdf:(n)=>`${n} archivo(s) ignorados: solo PDFs.`,
+    filesIgnoredImg:(n)=>`${n} archivo(s) ignorados: formato no compatible.`,
+    filesIgnoredTxt:(n)=>`${n} archivo(s) ignorados: solo .txt.`,
+    fileCount:(n)=>`${n} archivo${n>1?"s":""}`,totalSize:(s)=>`${s} en total`,
+    removeTitle:"Eliminar",closeModal:"\u2715 Cerrar",
+    cropDrawHint:"Dibuja un rect\u00e1ngulo en la vista previa para definir el \u00e1rea a conservar. Arrastra los controladores para ajustar.",
+    redactWarning:"\u26a0\ufe0f M\u00e9todo no seguro: los rect\u00e1ngulos negros ocultan visualmente el contenido pero no lo eliminan del archivo. El texto original sigue siendo extra\u00edble.",
+    redactDrawHint:"Dibuja rect\u00e1ngulos en la vista previa para marcar las zonas a censurar.",
+  },
+};
+
+function t(key, ...args) {
+  const lang = LANGS[currentLang] || {};
+  let val = key.split('.').reduce((o,k)=>(o&&o[k]!==undefined?o[k]:undefined), lang);
+  if (val === undefined) val = key.split('.').reduce((o,k)=>(o&&o[k]!==undefined?o[k]:undefined), BASE);
+  if (val === undefined) return key;
+  return typeof val === 'function' ? val(...args) : val;
+}
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+(async function loadPdfWorker(){
+  const src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const integrity='sha512-BbrZ76UNZq5BhH7LL7pn9A4TKQpQeNCHOo65/akfelcIBbcVvYWOFQKPXIrykE3qZxYjmDX573oa4Ywsc7rpTw==';
+  try{
+    const resp=await fetch(src,{integrity,mode:'cors',credentials:'omit'});
+    const blob=await resp.blob();
+    pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(blob);
+  }catch(e){
+    pdfjsLib.GlobalWorkerOptions.workerSrc=src;
+    console.warn('[Security] pdf.worker SRI check failed:',e);
+  }
+})();
+
+let currentLang = 'fr', currentMode = 'pdf', currentTheme = 'dark', capsOpen = false;
+let files = [], dragSrcIndex = null;
+let pdfDoc = null, pdfJsDoc = null, pageStates = [], pageDragSrc = null, _lastDragOverCard = null, _wmPreviewTimer = null, _cropCtx = null;
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function safeHexColor(c){return /^#[0-9A-Fa-f]{6}$/.test(c)?c:'#000000';}
+function sanitizeHtmlForIframe(html){
+  // Whitelist approach: remove dangerous elements then dangerous attributes/protocols
+  try{
+    const doc=new DOMParser().parseFromString(html,'text/html');
+    // Remove all potentially dangerous elements
+    const DANGEROUS_TAGS='script,noscript,iframe,object,embed,applet,base,link,meta[http-equiv],form,input,button,textarea,select,style[src],svg,math';
+    doc.querySelectorAll(DANGEROUS_TAGS).forEach(el=>el.remove());
+    // Sanitize remaining attributes
+    doc.querySelectorAll('*').forEach(el=>{
+      Array.from(el.attributes).forEach(attr=>{
+        const name=attr.name.toLowerCase();
+        // Strip all event handlers
+        if(name.startsWith('on')){el.removeAttribute(attr.name);return;}
+        // Strip dangerous URI schemes
+        if(name==='href'||name==='src'||name==='action'){
+          const val=attr.value.replace(/[\s\u0000-\u001f]/g,'').toLowerCase();
+          if(/^(javascript|vbscript|data):/.test(val)){el.removeAttribute(attr.name);}
+        }
+      });
+    });
+    return doc.documentElement.outerHTML;
+  }catch(e){
+    console.warn('[Security] HTML sanitization failed:',e);
+    return '';
+  }
+}
+
+// img
+let imgPageSize = 'A4', imgFit = 'contain';
+// txt
+let txtFontSize = 'normal', txtPageSz = 'A4', txtMarginSz = 'normal';
+// html
+let htmlPageSz = 'A4', htmlMarginSz = 'normal';
+// wm
+let wmColor = '#ffffff', wmPos = 'diagonal';
+// protect
+let currentAlgo = 'aes-256', pepperMode = 'manual', autoPepperVal = '';
+let permissions = {printing:true,copying:false,modifying:false,annotations:true};
+// split
+let splitMode = 'each'; // each | everyN | ranges
+// ocr
+let ocrLangs = new Set(['fra','eng','deu']);
+// crop
+let cropApply = 'all'; // all | single
+let _cropPdfJsDoc = null;
+// redact
+let redactZones = []; // [{page,x,y,w,h,color}] — in PDF points
+let _redactPdfJsDoc = null;
+let _redactDrawing = false;
+let _redactStart = null;
+let _redactColor = '#000000';
+// ocr
+let ocrText = '';
+
+const IMG_TYPES = ['image/jpeg','image/png','image/webp','image/gif','image/bmp'];
+const PAGE_SIZES = {A4:[595.28,841.89], Letter:[612,792]};
+const WM_COLORS = ['#ffffff','#000000','#e8ff47','#ff4747','#47c8ff','#aaaaaa'];
+const WM_POSITIONS = ['diagonal','center','topLeft','bottomRight'];
+const TXT_FONT_PT = {small:9, normal:11, large:14};
+const TXT_MARGIN_PT = {small:28, normal:50, large:72};
+const MODE_COLOR = {pdf:'bm-pdf',img:'bm-img',txt:'bm-txt',html:'bm-html',pages:'bm-pages',split:'bm-split',crop:'bm-crop',redact:'bm-redact',wm:'bm-wm',protect:'bm-protect',ocr:'bm-ocr'};
+const MODE_ICON = {pdf:'📄',img:'🖼️',txt:'📝',html:'🌐',pages:'✂️',split:'✂️',crop:'🔲',redact:'🖊️',wm:'🔏',protect:'🔒',ocr:'🔍'};
+
+// ═══════════════════════════════════════════
+// THEME & LANG
+// ═══════════════════════════════════════════
+function toggleTheme() {
+  currentTheme = currentTheme==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  document.getElementById('themeBtn').textContent = currentTheme==='dark'?'🌙':'☀️';
+}
+function detectLang() {
+  const n=(navigator.language||'fr').toLowerCase();
+  for(const l of['de','zh','it','es','en']) if(n.startsWith(l)) return l;
+  return 'fr';
+}
+function setLang(lang) {
+  currentLang=lang;
+  document.documentElement.lang=lang;
+  document.querySelectorAll('.lang-btn').forEach(b=>{
+    const code=b.textContent==='中文'?'zh':b.textContent.toLowerCase();
+    b.classList.toggle('active',code===lang);
+  });
+  applyUI();
+  render();
+  if(currentMode==='pages'&&pageStates.length) renderPageEditor();
+}
+
+// ═══════════════════════════════════════════
+// UI APPLY
+// ═══════════════════════════════════════════
+function applyUI() {
+  document.getElementById('subtitle').textContent = t('subtitle');
+  document.getElementById('capsTitle').textContent = t('capsTitle');
+  const tabs = t('tabs'); // object
+  for(const [k,v] of Object.entries(tabs)) {
+    const el = document.getElementById('lbl-'+k);
+    if(el) el.textContent = v;
+  }
+  document.getElementById('dropIcon').textContent = MODE_ICON[currentMode];
+  document.getElementById('dropTitle').textContent = t('dropTitle.'+currentMode);
+  document.getElementById('dropHint').textContent  = t('dropHint.'+currentMode);
+  const btn = document.getElementById('actionBtn');
+  btn.textContent = t('actionBtn.'+currentMode);
+  btn.className = 'btn-main ' + (MODE_COLOR[currentMode]||'bm-pdf');
+  document.getElementById('optionsLabel').textContent = t('optionsLabel');
+  const nm = document.getElementById('outputName');
+  nm.placeholder = t('placeholder');
+  if(!nm.dataset.userEdited) nm.value = t('defaultName.'+currentMode);
+  document.getElementById('modalClose').textContent = t('closeModal');
+  document.getElementById('btnSelectAll').textContent = t('btnSelectAll');
+  document.getElementById('btnSelectNone').textContent = t('btnSelectNone');
+  document.getElementById('btnDelete').textContent = t('btnDelete');
+  document.getElementById('compLevelLabel').textContent = t('compLevelLabel');
+  updateCompUI();
+  document.getElementById('wmTextLabel').textContent = t('wmTextLabel');
+  document.getElementById('wmOpacityLabel').textContent = t('wmOpacityLabel');
+  document.getElementById('wmSizeLabel').textContent = t('wmSizeLabel');
+  document.getElementById('wmColorLabel').textContent = t('wmColorLabel');
+  document.getElementById('wmPosLabel').textContent = t('wmPosLabel');
+  document.getElementById('encAlgoLabel').textContent = t('encAlgoLabel');
+  document.getElementById('pwdLabel').textContent = t('pwdLabel');
+  document.getElementById('pwdConfirmLabel').textContent = t('pwdConfirmLabel');
+  document.getElementById('pwdHint').textContent = t('pwdHint');
+  document.getElementById('ocrResultLabel').textContent = t('ocrResultLabel');
+  document.getElementById('ocrCopyBtn').textContent = t('ocrCopyBtn');
+  document.getElementById('ocrSaveBtn').textContent = t('ocrSaveBtn');
+  document.getElementById('ocrSavePdfBtn').textContent = t('ocrSavePdfBtn');
+  document.getElementById('ocrLangNote').textContent = t('ocrLangNote');
+  document.getElementById('ocrLangLabel').textContent = t('ocrLangLabel');
+  document.getElementById('cancelBtn').textContent = t('btnCancel');
+  document.getElementById('htmlEditorLabel').textContent = t('htmlEditorLabel');
+  document.getElementById('htmlInfo').textContent = t('htmlInfo');
+  document.getElementById('htmlTplBasic').textContent = t('htmlTplBasic');
+  document.getElementById('htmlTplTable').textContent = t('htmlTplTable');
+  document.getElementById('htmlTplLetter').textContent = t('htmlTplLetter');
+  document.getElementById('pageSizeLabel').textContent = t('pageSizeLabel');
+  document.getElementById('fitLabel').textContent = t('fitLabel');
+  document.getElementById('txtFontSizeLabel').textContent = t('txtFontSizeLabel');
+  document.getElementById('txtPageSzLabel').textContent = t('txtPageSzLabel');
+  document.getElementById('txtMgLabel').textContent = t('txtMgLabel');
+  document.getElementById('htmlPageSzLabel').textContent = t('htmlPageSzLabel');
+  document.getElementById('htmlMgLabel').textContent = t('htmlMgLabel');
+  document.getElementById('splitModeLabel').textContent = t('splitModeLabel');
+  // crop/redact labels
+  const safeSet=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
+  safeSet('cropApplyLabel',t('cropApplyLabel'));
+  safeSet('cropPageLabel',t('cropPageLabel'));
+  safeSet('cropDrawHint',t('cropDrawHint'));
+  safeSet('cropCoordsLabel',t('cropCoordsLabel'));
+  safeSet('cropResetBtn',t('cropResetBtn'));
+  safeSet('cropPreviewLabel',t('cropPreviewLabel'));
+  safeSet('cropPreviewPlaceholder',t('cropPreviewPlaceholder'));
+  safeSet('redactColorLabel',t('redactColorLabel'));
+  safeSet('redactPageLabel',t('redactPageLabel'));
+  safeSet('redactDrawHint',t('redactDrawHint'));
+  safeSet('redactClearBtn',t('redactClearBtn'));
+  safeSet('redactWarning',t('redactWarning'));
+  safeSet('wmPreviewLabel',t('wmPreviewLabel'));
+  renderCropApplyUI();
+  renderRedactColorUI();
+  document.getElementById('splitEveryLabel').textContent = t('splitEveryLabel');
+  document.getElementById('splitEveryUnit').textContent = t('splitEveryUnit');
+  document.getElementById('splitRangeLabel').textContent = t('splitRangeLabel');
+  document.getElementById('splitRangeHint').textContent = t('splitRangeHint');
+  // dot colors for caps
+  renderCaps();
+  renderImgOptions(); renderTxtOptions(); renderHtmlOptions();
+  renderWmOptions(); renderEncAlgoUI(); renderPepperUI(); renderPermissionsUI();
+  updateCompUI(); renderSplitOptions();
+  // protect labels
+  const peps = ['pepperTitle','pepperDesc','pepperModeManual','pepperModeAuto','pepperManualLabel','pepperAutoLabel','pepperGenBtn','pepperAutoHint','permTitle'];
+  peps.forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=t(id.replace(/([A-Z])/g,'.$1').toLowerCase().replace('.','').replace('pepper.','pepper').replace('perm.','perm').replace('pwd.','pwd')||id);});
+  document.getElementById('pepperTitle').textContent = t('pepperTitle');
+  document.getElementById('pepperDesc').textContent = t('pepperDesc');
+  document.getElementById('pepperModeManual').textContent = t('pepperModeManual');
+  document.getElementById('pepperModeAuto').textContent = t('pepperModeAuto');
+  document.getElementById('pepperManualLabel').textContent = t('pepperManualLabel');
+  document.getElementById('pepperAutoLabel').textContent = t('pepperAutoLabel');
+  document.getElementById('pepperGenBtn').textContent = t('pepperGenBtn');
+  document.getElementById('pepperAutoHint').textContent = t('pepperAutoHint');
+  document.getElementById('permTitle').textContent = t('permTitle');
+  document.getElementById('pwdStrengthLabel').textContent = t('pwdStrengthLabel');
+  // Aria-labels pour boutons icônes (accessibilité)
+  const safeAria=(id,val)=>{const el=document.getElementById(id);if(el)el.setAttribute('aria-label',val);};
+  safeAria('themeBtn',       t('ariaThemeBtn'));
+  safeAria('clearAllBtn',    t('ariaClearAll'));
+  safeAria('btnRotate90',    t('ariaRotate90'));
+  safeAria('btnRotateMinus90',t('ariaRotateMinus90'));
+  safeAria('pwdVisBtn',      t('ariaPwdVis'));
+  safeAria('pwdConfirmVisBtn',t('ariaPwdVis'));
+  safeAria('cropPrevBtn',    t('ariaPrevPage'));
+  safeAria('cropNextBtn',    t('ariaNextPage'));
+  safeAria('redactPrevBtn',  t('ariaPrevPage'));
+  safeAria('redactNextBtn',  t('ariaNextPage'));
+  safeAria('modalClose',     t('ariaModalClose'));
+  // Textes de placeholder hardcodés → i18n
+  safeSet('wmPreviewPlaceholder', t('wmPreviewPlaceholderText'));
+  safeSet('redactPlaceholder',    t('redactPlaceholderText'));
+}
+
+function toggleCaps() {
+  capsOpen=!capsOpen;
+  document.getElementById('capsPanel').classList.toggle('open',capsOpen);
+}
+function renderCaps() {
+  const dotColors={accent:'var(--accent)',blue:'var(--blue)',teal:'var(--teal)',green:'var(--green)',pink:'var(--pink)',purple:'var(--purple)',orange:'var(--orange)'};
+  const caps=t('caps');
+  document.getElementById('capsBody').innerHTML=caps.map(c=>`
+    <div class="cap-item">
+      <div class="cap-dot" style="background:${dotColors[c.dot]||'var(--accent)'}"></div>
+      <div><div class="cap-label">${escapeHtml(c.label)}</div><div class="cap-desc">${escapeHtml(c.desc)}</div></div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// MODE
+// ═══════════════════════════════════════════
+function setMode(mode) {
+  if(isProcessing) return;
+  clearSensitiveData();
+  if(_wmPdfJsDoc){_wmPdfJsDoc.destroy();_wmPdfJsDoc=null;}
+  if(_cropPdfJsDoc){_cropPdfJsDoc.destroy();_cropPdfJsDoc=null;}
+  if(_redactPdfJsDoc){_redactPdfJsDoc.destroy();_redactPdfJsDoc=null;}
+  currentMode=mode; files=[]; pdfDoc=null; pdfJsDoc=null; pageStates=[];
+  hide('successBanner'); hide('progressWrap');
+  document.getElementById('pageEditor').classList.remove('visible');
+  document.getElementById('ocrPanel').style.display='none';
+  document.getElementById('ocrResult').textContent='';
+
+  // Tab highlights
+  Object.keys(MODE_COLOR).forEach(m=>{
+    const tab=document.getElementById('tab-'+m);
+    if(tab) tab.className='mode-tab'+(m===mode?' t-'+m:'');
+  });
+
+  // Dropzone class
+  document.getElementById('dropzone').className='dropzone dz-'+mode;
+
+  // Show/hide html editor
+  document.getElementById('htmlEditorWrap').style.display = mode==='html'?'flex':'none';
+  // Hide dropzone for html (no file needed)
+  document.getElementById('dropzone').style.display = mode==='html'?'none':'block';
+
+  // File input config
+  const fi=document.getElementById('fileInput');
+  const multiModes=['pdf','img','txt'];
+  fi.multiple=multiModes.includes(mode);
+  fi.accept=mode==='img'?'image/jpeg,image/png,image/webp,image/gif,image/bmp,.jpg,.jpeg,.png,.webp,.gif,.bmp'
+    :mode==='txt'?'.txt,text/plain'
+    :mode==='ocr'?'.pdf,.jpg,.jpeg,.png,image/jpeg,image/png,application/pdf'
+    :'.pdf,application/pdf';
+
+  // Reset filename
+  const nm=document.getElementById('outputName');
+  nm.dataset.userEdited='';
+  nm.value=t('defaultName.'+mode);
+
+  // Extension badge
+  document.getElementById('extBadge').textContent='.pdf';
+
+  applyUI();
+  showPanels();
+  render();
+}
+
+function showPanels() {
+  const mode=currentMode, hasFiles=files.length>0;
+  const show=(id,cond)=>document.getElementById(id).classList.toggle('visible',!!cond);
+  show('imgOptions',      mode==='img'&&hasFiles);
+  show('compressionPanel',mode==='pdf'&&hasFiles);
+  show('txtPanel',        mode==='txt'&&hasFiles);
+  show('htmlOptions',     mode==='html');
+  show('wmPanel',         mode==='wm'&&hasFiles);
+  if(mode==='wm') requestAnimationFrame(updateWmPreview);
+  show('protectPanel',    mode==='protect'&&hasFiles);
+  show('splitPanel',      mode==='split'&&hasFiles);
+  show('cropPanel',       mode==='crop'&&hasFiles);
+  show('redactPanel',     mode==='redact'&&hasFiles);
+  show('ocrOptionsPanel', mode==='ocr'&&hasFiles);
+  if(mode==='protect'&&hasFiles){renderEncAlgoUI();renderPepperUI();renderPermissionsUI();}
+  if(mode==='crop'&&hasFiles){if(_cropPdfJsDoc){_cropPdfJsDoc.destroy();}_cropPdfJsDoc=null;_cropRect=null;_cropListenersAttached=false;_cropBusy=false;requestAnimationFrame(loadCropPage);}
+  if(mode==='redact'&&hasFiles){if(_redactPdfJsDoc){_redactPdfJsDoc.destroy();}_redactPdfJsDoc=null;redactZones=[];_redactListenersAttached=false;_redactBusy=false;requestAnimationFrame(loadRedactPage);}
+  if(mode==='txt'&&hasFiles) updateTxtPreview();
+}
+
+// ═══════════════════════════════════════════
+// FILES
+// ═══════════════════════════════════════════
+const dropzone=document.getElementById('dropzone');
+const fileInput=document.getElementById('fileInput');
+dropzone.addEventListener('dragover',e=>{e.preventDefault();dropzone.classList.add('drag-over');});
+dropzone.addEventListener('dragleave',()=>dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop',e=>{e.preventDefault();dropzone.classList.remove('drag-over');addFiles([...e.dataTransfer.files]);});
+fileInput.addEventListener('change',()=>{addFiles([...fileInput.files]);fileInput.value='';});
+document.getElementById('outputName').addEventListener('input',function(){this.dataset.userEdited='true';});
+
+const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 Mo
+function addFiles(newFiles) {
+  if(isProcessing) return;
+  // Reject oversized files
+  const oversized = newFiles.filter(f=>f.size > MAX_FILE_SIZE);
+  if(oversized.length){ alert(t('errorFileTooLarge', fmtSize(MAX_FILE_SIZE))); }
+  // Reject empty files
+  const empty = newFiles.filter(f=>f.size===0);
+  if(empty.length){ alert(t('errorFileEmpty')); }
+  newFiles = newFiles.filter(f=>f.size>0 && f.size<=MAX_FILE_SIZE);
+  if(!newFiles.length) return;
+  const large = newFiles.filter(f=>f.size>100*1024*1024);
+  if(large.length){ alert(t('warnFileLarge', fmtSize(large[0].size))); }
+  const m=currentMode;
+  let valid, ignored;
+  if(m==='img'){
+    valid=newFiles.filter(f=>IMG_TYPES.includes(f.type)||/\.(jpe?g|png|webp|gif|bmp)$/i.test(f.name));
+    ignored=newFiles.length-valid.length;
+    if(ignored) alert(t('filesIgnoredImg',ignored));
+    files.push(...valid);
+  } else if(m==='txt'){
+    valid=newFiles.filter(f=>f.type==='text/plain'||f.name.toLowerCase().endsWith('.txt'));
+    ignored=newFiles.length-valid.length;
+    if(ignored) alert(t('filesIgnoredTxt',ignored));
+    files.push(...valid);
+  } else if(m==='ocr'){
+    valid=newFiles.filter(f=>f.type==='application/pdf'||IMG_TYPES.includes(f.type)||/\.(pdf|jpe?g|png)$/i.test(f.name));
+    files=valid.slice(0,1);
+  } else {
+    valid=newFiles.filter(f=>f.type==='application/pdf'||f.name.toLowerCase().endsWith('.pdf'));
+    ignored=newFiles.length-valid.length;
+    if(ignored) alert(t('filesIgnoredPdf',ignored));
+    if(['pages','split','wm','protect','crop','redact'].includes(m)) files=valid.slice(0,1);
+    else files.push(...valid);
+  }
+  if(m==='wm'){if(_wmPdfJsDoc){_wmPdfJsDoc.destroy();}_wmPdfJsDoc=null;}
+  if(m==='crop'){if(_cropPdfJsDoc){_cropPdfJsDoc.destroy();}_cropPdfJsDoc=null;_cropRect=null;_cropListenersAttached=false;}
+  if(m==='redact'){if(_redactPdfJsDoc){_redactPdfJsDoc.destroy();}_redactPdfJsDoc=null;redactZones=[];_redactListenersAttached=false;}
+  showPanels();
+  if(m==='pages'&&files.length===1) loadPagesMode(files[0]);
+  if(m==='split'&&files.length===1) loadPagesMode(files[0]);
+  render();
+}
+
+function removeFile(i){files.splice(i,1);showPanels();render();}
+function clearSensitiveData(){
+  const pi=document.getElementById('pwdInput');if(pi)pi.value='';
+  const pc=document.getElementById('pwdConfirm');if(pc)pc.value='';
+  const pm=document.getElementById('pepperManual');if(pm)pm.value='';
+  const pa=document.getElementById('pepperAutoVal');if(pa)pa.value='';
+  autoPepperVal='';
+  ocrText='';
+  const orEl=document.getElementById('ocrResult');if(orEl)orEl.textContent='';
+  _cropSnap=null;
+  const rc=document.getElementById('redactCanvas');if(rc)delete rc._snapshot;
+  const sw=document.getElementById('pwdStrengthWrap');if(sw)sw.style.display='none';
+  const pp=document.getElementById('pepperPreview');if(pp)pp.style.display='none';
+}
+function clearAll(){
+  if(files.length&&!confirm(t('confirmClearAll'))) return;
+  files=[];pdfDoc=null;pdfJsDoc=null;pageStates=[];
+  if(_wmPdfJsDoc){_wmPdfJsDoc.destroy();_wmPdfJsDoc=null;}
+  if(_cropPdfJsDoc){_cropPdfJsDoc.destroy();_cropPdfJsDoc=null;}
+  if(_redactPdfJsDoc){_redactPdfJsDoc.destroy();_redactPdfJsDoc=null;}
+  clearSensitiveData();
+  hide('successBanner');hide('progressWrap');
+  document.getElementById('pageEditor').classList.remove('visible');
+  document.getElementById('ocrPanel').style.display='none';
+  ['imgOptions','compressionPanel','txtPanel','htmlOptions','wmPanel','protectPanel','splitPanel','cropPanel','redactPanel','ocrOptionsPanel'].forEach(id=>document.getElementById(id).classList.remove('visible'));
+  render();
+}
+
+// ═══════════════════════════════════════════
+// RENDER FILE LIST
+// ═══════════════════════════════════════════
+function fmtSize(bytes){const u=t('sizeUnits');if(bytes<1024)return bytes+' '+u.o;if(bytes<1048576)return Math.round(bytes/1024)+' '+u.ko;return(bytes/1048576).toFixed(1)+' '+u.mo;}
+function getExt(name){return name.split('.').pop().toUpperCase().slice(0,4);}
+
+let _renderKey='';
+function render() {
+  const list=document.getElementById('fileList');
+  const mode=currentMode;
+  const canDrag=(mode==='pdf'||mode==='img'||mode==='txt')&&files.length>1;
+
+  if(mode==='html'){
+    document.getElementById('optionsBar').style.display='flex';
+    document.getElementById('infoRow').style.display='none';
+    document.getElementById('dragHint').style.display='none';
+    document.getElementById('actionBtn').disabled=false;
+    return;
+  }
+
+  if(!files.length){
+    document.getElementById('optionsBar').style.display='none';
+    document.getElementById('infoRow').style.display='none';
+    document.getElementById('dragHint').style.display='none';
+    document.getElementById('actionBtn').disabled=true;
+    return;
+  }
+
+  document.getElementById('optionsBar').style.display='flex';
+  document.getElementById('infoRow').style.display='flex';
+  document.getElementById('dragHint').style.display=canDrag?'block':'none';
+  if(canDrag) document.getElementById('dragHint').textContent=t('dragHint');
+  const minF={pdf:2,img:1,txt:1,pages:1,split:1,wm:1,protect:1,ocr:1};
+  document.getElementById('actionBtn').disabled=files.length<(minF[mode]||1);
+
+  const total=files.reduce((s,f)=>s+f.size,0);
+  document.getElementById('fileCount').textContent=t('fileCount',files.length);
+  document.getElementById('totalSize').textContent=t('totalSize',fmtSize(total));
+
+  // Skip full DOM rebuild if file list identity hasn't changed
+  const newKey=mode+'|'+files.map(f=>f.name+'#'+f.size+'#'+f.lastModified).join(',');
+  if(newKey===_renderKey) return;
+  _renderKey=newKey;
+  list.innerHTML='';
+
+  files.forEach((f,i)=>{
+    const item=document.createElement('div');
+    item.className='file-item';
+    item.draggable=canDrag;
+    let iconHtml, blobUrlToRevoke=null;
+    if(mode==='img'&&IMG_TYPES.includes(f.type)){
+      blobUrlToRevoke=URL.createObjectURL(f);
+      iconHtml=`<div class="file-thumb-slot"></div>`;
+    } else if(f.name.toLowerCase().endsWith('.txt')){
+      iconHtml=`<div class="file-icon fi-txt">.TXT</div>`;
+    } else if(f.name.toLowerCase().endsWith('.html')||f.name.toLowerCase().endsWith('.htm')){
+      iconHtml=`<div class="file-icon fi-htm">HTML</div>`;
+    } else {
+      iconHtml=`<div class="pdf-preview-thumb" id="pthumb-${i}"><div style="font-size:.5rem;color:var(--muted)">PDF</div></div>`;
+    }
+    item.innerHTML=`
+      <div class="order-badge">${i+1}</div>
+      ${iconHtml}
+      <div class="file-info">
+        <div class="file-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</div>
+        <div class="file-meta">${fmtSize(f.size)}</div>
+      </div>
+      ${canDrag?'<span class="file-handle">⠿</span>':''}
+      <button class="file-remove" data-idx="${i}" title="${t('removeTitle')}">✕</button>`;
+    if(canDrag){
+      item.addEventListener('dragstart',e=>{dragSrcIndex=i;setTimeout(()=>item.classList.add('dragging'),0);e.dataTransfer.effectAllowed='move';});
+      item.addEventListener('dragend',()=>item.classList.remove('dragging'));
+      item.addEventListener('dragover',e=>{e.preventDefault();item.classList.add('drag-target');});
+      item.addEventListener('dragleave',()=>item.classList.remove('drag-target'));
+      item.addEventListener('drop',e=>{e.preventDefault();item.classList.remove('drag-target');if(dragSrcIndex!==null&&dragSrcIndex!==i){const m=files.splice(dragSrcIndex,1)[0];files.splice(i,0,m);dragSrcIndex=null;render();}});
+    }
+    // Inject image via JS (avoids inline onload handler)
+    if(blobUrlToRevoke){
+      const slot=item.querySelector('.file-thumb-slot');
+      const img=document.createElement('img');
+      img.className='file-thumb';img.alt='';
+      const cleanup=()=>URL.revokeObjectURL(blobUrlToRevoke);
+      img.addEventListener('load',cleanup);
+      img.addEventListener('error',cleanup);
+      img.src=blobUrlToRevoke;
+      if(slot)slot.replaceWith(img);
+    }
+    list.appendChild(item);
+    if(f.name.toLowerCase().endsWith('.pdf')||f.type==='application/pdf') renderPdfThumb(f,i);
+  });
+}
+
+async function renderPdfThumb(file,i){
+  try{
+    const bytes=await readAsBuffer(file);
+    const doc=await pdfjsLib.getDocument({data:bytes}).promise;
+    const page=await doc.getPage(1);
+    const vp=page.getViewport({scale:.3});
+    const canvas=document.createElement('canvas');
+    canvas.width=vp.width;canvas.height=vp.height;
+    await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+    const wrap=document.getElementById(`pthumb-${i}`);
+    if(wrap){wrap.innerHTML='';wrap.appendChild(canvas);}
+  }catch(e){}
+}
+
+// ═══════════════════════════════════════════
+// IMG OPTIONS
+// ═══════════════════════════════════════════
+function renderImgOptions(){
+  const ps=t('pageSizes');
+  document.getElementById('pageSizeGroup').innerHTML=['A4','Letter','Auto'].map(s=>`<button class="opt-btn${imgPageSize===s?' sel':''}" data-sz="${escapeHtml(s)}">${escapeHtml(ps[s])}</button>`).join('');
+  document.getElementById('fitGroup').innerHTML=[['contain',t('fitContain')],['cover',t('fitCover')]].map(([v,l])=>`<button class="opt-btn${imgFit===v?' sel':''}" data-fit="${escapeHtml(v)}">${escapeHtml(l)}</button>`).join('');
+}
+function setImgOpt(type,val){if(type==='sz')imgPageSize=val;else imgFit=val;renderImgOptions();}
+
+// ═══════════════════════════════════════════
+// COMPRESSION
+// ═══════════════════════════════════════════
+function updateCompUI(){
+  const lvl=parseInt(document.getElementById('compRange').value)-1;
+  const levels=t('compLevels');
+  document.getElementById('compVal').textContent=levels[lvl]||'';
+  const info=document.getElementById('compInfoBox');
+  if(info){info.textContent=t('compInfo')||'';info.style.display=files.length>0&&currentMode==='pdf'?'block':'none';}
+}
+
+// ═══════════════════════════════════════════
+// TXT OPTIONS
+// ═══════════════════════════════════════════
+function renderTxtOptions(){
+  const fs=t('txtFontSizes'),mg=t('txtMarginSizes'),ps=t('pageSizes');
+  document.getElementById('txtFontSizeGroup').innerHTML=Object.entries(fs).map(([k,v])=>`<button class="opt-btn${txtFontSize===k?' sel-teal':''}" data-fs="${escapeHtml(k)}">${escapeHtml(v)}</button>`).join('');
+  document.getElementById('txtPageSzGroup').innerHTML=['A4','Letter'].map(s=>`<button class="opt-btn${txtPageSz===s?' sel-teal':''}" data-ps="${escapeHtml(s)}">${escapeHtml(ps[s])}</button>`).join('');
+  document.getElementById('txtMgGroup').innerHTML=Object.entries(mg).map(([k,v])=>`<button class="opt-btn${txtMarginSz===k?' sel-teal':''}" data-mg="${escapeHtml(k)}">${escapeHtml(v)}</button>`).join('');
+}
+function setTxtOpt(type,val){if(type==='fs')txtFontSize=val;else if(type==='ps')txtPageSz=val;else txtMarginSz=val;renderTxtOptions();updateTxtPreview();}
+function updateTxtPreview(){
+  const info=document.getElementById('txtPreviewInfo');
+  if(!files.length){info.style.display='none';return;}
+  const [pw,ph]=PAGE_SIZES[txtPageSz]||PAGE_SIZES.A4;
+  const mg=TXT_MARGIN_PT[txtMarginSz];
+  const fsPt=TXT_FONT_PT[txtFontSize];
+  const lineH=fsPt*1.45;
+  const usableH=ph-mg*2;
+  const linesPerPage=Math.floor(usableH/lineH);
+  const usableW=pw-mg*2;
+  // Courier: width of char at size = size * 0.6 pts
+  const charsPerLine=Math.floor(usableW/(fsPt*0.6));
+  let totalPages=0;
+  files.forEach(f=>{
+    const estimatedLines=Math.ceil(f.size/Math.max(1,charsPerLine));
+    totalPages+=Math.ceil(estimatedLines/Math.max(1,linesPerPage));
+  });
+  const fn=t('txtPreviewInfo');
+  info.textContent=typeof fn==='function'?fn(files.length,Math.max(1,totalPages)):'';
+  info.style.display='block';
+}
+
+// ═══════════════════════════════════════════
+// HTML OPTIONS
+// ═══════════════════════════════════════════
+function renderHtmlOptions(){
+  const ps=t('pageSizes'),mg=t('txtMarginSizes');
+  document.getElementById('htmlPageSzGroup').innerHTML=['A4','Letter'].map(s=>`<button class="opt-btn${htmlPageSz===s?' sel-blue':''}" data-ps="${escapeHtml(s)}">${escapeHtml(ps[s])}</button>`).join('');
+  document.getElementById('htmlMgGroup').innerHTML=Object.entries(mg).map(([k,v])=>`<button class="opt-btn${htmlMarginSz===k?' sel-blue':''}" data-mg="${escapeHtml(k)}">${escapeHtml(v)}</button>`).join('');
+  document.getElementById('htmlOptions').classList.add('visible');
+}
+function setHtmlOpt(type,val){if(type==='ps')htmlPageSz=val;else htmlMarginSz=val;renderHtmlOptions();}
+
+const HTML_TEMPLATES = {
+  basic:`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;margin:40px;color:#222;line-height:1.6}h1{color:#1a1a7e}h2{color:#333;border-bottom:1px solid #ddd;padding-bottom:4px}</style></head><body><h1>Titre du Document</h1><p>Votre contenu ici. Modifiez ce modèle selon vos besoins.</p><h2>Section 1</h2><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque habitant morbi tristique senectus.</p><h2>Section 2</h2><ul><li>Élément 1</li><li>Élément 2</li><li>Élément 3</li></ul></body></html>`,
+  table:`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;margin:40px}table{width:100%;border-collapse:collapse;margin-top:16px}th{background:#1a1a7e;color:#fff;padding:10px;text-align:left}td{padding:9px;border-bottom:1px solid #ddd}tr:nth-child(even){background:#f5f5f5}h1{color:#1a1a7e}</style></head><body><h1>Rapport de Données</h1><table><tr><th>Colonne A</th><th>Colonne B</th><th>Colonne C</th></tr><tr><td>Donnée 1</td><td>Valeur 1</td><td>100</td></tr><tr><td>Donnée 2</td><td>Valeur 2</td><td>250</td></tr><tr><td>Donnée 3</td><td>Valeur 3</td><td>180</td></tr></table></body></html>`,
+  letter:`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Georgia,serif;margin:60px 80px;color:#222;line-height:1.8}.sender{text-align:right;margin-bottom:40px}.date{text-align:right;color:#666}.subject{font-weight:bold;margin:20px 0}.signature{margin-top:40px}</style></head><body><div class="sender"><strong>Jean Dupont</strong><br>123 Rue de la Paix<br>75001 Paris</div><div class="date">Paris, le ${new Date().toLocaleDateString('fr-FR')}</div><div>Madame, Monsieur,</div><p class="subject">Objet : Votre demande du ...</p><p>Suite à votre courrier, nous avons le plaisir de vous informer que...</p><p>Dans l'attente de votre réponse, nous restons à votre disposition.</p><div class="signature">Veuillez agréer, Madame, Monsieur, l'expression de nos salutations distinguées.<br><br><strong>Jean Dupont</strong></div></body></html>`,
+};
+function loadHtmlTemplate(tpl){document.getElementById('htmlEditor').value=HTML_TEMPLATES[tpl]||'';}
+
+// ═══════════════════════════════════════════
+// WATERMARK
+// ═══════════════════════════════════════════
+function renderWmOptions(){
+  const wmRow=document.getElementById('wmColorRow');
+  wmRow.innerHTML=WM_COLORS.map(c=>`<div class="color-swatch${wmColor===c?' active':''}" style="background:${c}"></div>`).join('');
+  wmRow.querySelectorAll('.color-swatch').forEach((el,i)=>{el.addEventListener('click',()=>setWmColor(WM_COLORS[i]));});
+  const pos=t('wmPositions');
+  document.getElementById('wmPosGroup').innerHTML=WM_POSITIONS.map(p=>`<button class="opt-btn${wmPos===p?' sel-purple':''}" data-pos="${escapeHtml(p)}">${escapeHtml(pos[p]||p)}</button>`).join('');
+  updateWmPreview();
+}
+function setWmColor(c){wmColor=c;renderWmOptions();}
+function setWmPos(p){wmPos=p;renderWmOptions();}
+
+// ══ Watermark live preview ══════════════════════════
+let _wmPdfJsDoc=null, _wmPreviewBusy=false;
+
+function debouncedUpdateWmPreview(){if(_wmPreviewTimer)clearTimeout(_wmPreviewTimer);_wmPreviewTimer=setTimeout(function(){updateWmPreview();_wmPreviewTimer=null;},200);}
+async function updateWmPreview(){
+  const canvas=document.getElementById('wmPreviewCanvas');
+  const placeholder=document.getElementById('wmPreviewPlaceholder');
+  const wrap=document.getElementById('wmPreviewWrap');
+  if(!canvas||!wrap)return;
+
+  const hasPdf=files.length>0&&currentMode==='wm';
+  if(!hasPdf)_wmPdfJsDoc=null;
+
+  // Container CSS width in real pixels
+  const dpr=window.devicePixelRatio||1;
+  const cssW=wrap.clientWidth||600;
+
+  if(!hasPdf){
+    // Blank A4 mockup — set canvas to A4 ratio at container width
+    const ratio=PAGE_SIZES.A4[0]/PAGE_SIZES.A4[1]; // A4 width/height
+    const cssH=Math.round(cssW/ratio);
+    canvas.style.height=cssH+'px';
+    canvas.width=Math.round(cssW*dpr);
+    canvas.height=Math.round(cssH*dpr);
+    const ctx=canvas.getContext('2d');
+    ctx.scale(dpr,dpr);
+    // Draw page background
+    ctx.fillStyle='#f9f9f9';ctx.fillRect(0,0,cssW,cssH);
+    // Light line guides
+    ctx.strokeStyle='#e8e8e8';ctx.lineWidth=1;
+    const lineSpacing=cssH/30;
+    const mx=cssW*0.08;
+    for(let y=mx+lineSpacing;y<cssH-mx;y+=lineSpacing){
+      ctx.beginPath();ctx.moveTo(mx,y);ctx.lineTo(cssW-mx,y);ctx.stroke();
+    }
+    placeholder.style.display='none';
+    drawWmOverlay(ctx,cssW,cssH,dpr);
+    return;
+  }
+
+  if(_wmPreviewBusy)return;
+  _wmPreviewBusy=true;
+  placeholder.style.display='none';
+  try{
+    if(!_wmPdfJsDoc){
+      const bytes=await readAsBuffer(files[0]);
+      _wmPdfJsDoc=await pdfJsLoadDoc(bytes);
+    }
+    const page=await _wmPdfJsDoc.getPage(1);
+    // Scale so the rendered page fills the container width at device resolution
+    const unscaledVp=page.getViewport({scale:1});
+    const scale=(cssW*dpr)/unscaledVp.width;
+    const vp=page.getViewport({scale});
+    const cssH=Math.round(vp.height/dpr);
+
+    canvas.width=Math.round(vp.width);
+    canvas.height=Math.round(vp.height);
+    canvas.style.height=cssH+'px';
+
+    const ctx=canvas.getContext('2d');
+    await page.render({canvasContext:ctx,viewport:vp}).promise;
+    // Draw watermark overlay scaled to canvas physical pixels
+    drawWmOverlay(ctx,vp.width,vp.height,dpr);
+  }catch(e){placeholder.style.display='flex';}
+  _wmPreviewBusy=false;
+}
+
+function drawWmOverlay(ctx,W,H,dpr=1){
+  const text=document.getElementById('wmText')?.value||'WATERMARK';
+  const opacity=parseInt(document.getElementById('wmOpacity')?.value||25)/100;
+  const sizePt=parseInt(document.getElementById('wmSize')?.value||48);
+
+  // sizePt is in PDF points (1pt = 1/72 inch).
+  // The canvas represents a PDF page: W physical pixels = A4 width PDF points.
+  // So 1 PDF pt = W/A4_W physical pixels.
+  const ptToPx=W/PAGE_SIZES.A4[0];
+  const sizePx=Math.round(sizePt*ptToPx);
+
+  // Positions mirror applyWatermark exactly
+  let x,y,rot=0;
+  if(wmPos==='diagonal'){x=W*0.1;y=H*0.5;rot=35*Math.PI/180;}
+  else if(wmPos==='center'){x=W/2;y=H/2;}
+  else if(wmPos==='topLeft'){x=W*0.05;y=H*0.08;}
+  else{x=W*0.95;y=H*0.95;}
+
+  ctx.save();
+  ctx.globalAlpha=opacity;
+  ctx.font=`bold ${sizePx}px Arial,sans-serif`;
+  ctx.fillStyle=wmColor;
+  if(wmColor==='#ffffff'){ctx.shadowColor='rgba(0,0,0,0.35)';ctx.shadowBlur=Math.round(4*dpr);}
+  ctx.textBaseline='middle';
+  ctx.textAlign=wmPos==='bottomRight'?'right':wmPos==='center'?'center':'left';
+  ctx.translate(x,y);
+  if(rot)ctx.rotate(rot);
+  ctx.fillText(text,0,0);
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════
+// PROTECT
+// ═══════════════════════════════════════════
+function _getSupportedAlgos(algos){
+  // Detect at runtime which algorithms the loaded pdf-lib build actually supports
+  const encEnum=PDFLib.EncryptionAlgorithm;
+  if(!encEnum) return Object.keys(algos).filter(k=>k==='aes-128'); // fallback: only AES-128 known to be default
+  return Object.keys(algos);
+}
+function renderEncAlgoUI(){
+  const algos=t('encAlgos');
+  const supported=_getSupportedAlgos(algos);
+  if(!supported.includes(currentAlgo)){currentAlgo=supported[supported.length-1]||'aes-128';}
+  document.getElementById('encAlgoGroup').innerHTML=supported.map(k=>{const a=algos[k];return `<button class="opt-btn${currentAlgo===k?' sel-orange':''}" data-algo="${escapeHtml(k)}">${escapeHtml(a.label)} <span style="font-size:.65rem;opacity:.7">${escapeHtml(a.badge)}</span></button>`;}).join('');
+  const info=algos[currentAlgo];
+  document.getElementById('encAlgoInfo').textContent=info?'🔐 '+info.desc:'';
+}
+function setAlgo(a){currentAlgo=a;renderEncAlgoUI();}
+function renderPepperUI(){
+  const isAuto=pepperMode==='auto';
+  document.getElementById('pepperModeManual').className='opt-btn'+(!isAuto?' sel-orange':'');
+  document.getElementById('pepperModeAuto').className='opt-btn'+(isAuto?' sel-orange':'');
+  document.getElementById('pepperManualWrap').style.display=isAuto?'none':'flex';
+  document.getElementById('pepperAutoWrap').style.display=isAuto?'block':'none';
+  if(isAuto&&!autoPepperVal) generatePepper();
+  if(isAuto) document.getElementById('pepperAutoVal').value=autoPepperVal;
+  updatePepperPreview();
+}
+function setPepperMode(m){pepperMode=m;renderPepperUI();}
+function generatePepper(){
+  // 64 chars exactly (power of 2) → b & 63 has zero modulo bias
+  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*-_';
+  const arr=new Uint8Array(16);crypto.getRandomValues(arr);
+  autoPepperVal=Array.from(arr).map(b=>chars[b&63]).join('');
+  document.getElementById('pepperAutoVal').value=autoPepperVal;
+  updatePepperPreview();
+}
+function getPepperValue(){return pepperMode==='auto'?autoPepperVal:document.getElementById('pepperManual').value.trim();}
+function updatePepperPreview(){
+  const pepper=getPepperValue();
+  const pwd=document.getElementById('pwdInput')?.value||'';
+  const el=document.getElementById('pepperPreview');
+  if(!el) return;
+  if(pepper&&pwd){const fn=t('pepperPreview');el.textContent=typeof fn==='function'?fn(pwd,pepper):'';el.style.display='block';}
+  else el.style.display='none';
+}
+function renderPermissionsUI(){
+  const labels=t('permissions');
+  const grid=document.getElementById('permGrid');
+  grid.innerHTML=Object.entries(permissions).map(([k,v])=>`
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.8rem;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;">
+      <input type="checkbox" ${v?'checked':''} data-perm="${k}" style="width:14px;height:14px;accent-color:var(--orange);cursor:pointer;">
+      <span>${escapeHtml(labels[k]||k)}</span>
+    </label>`).join('');
+  grid.querySelectorAll('input[data-perm]').forEach(inp=>{
+    inp.addEventListener('change',function(){permissions[this.dataset.perm]=this.checked;});
+  });
+}
+function updatePwdStrength(){
+  const pwd=document.getElementById('pwdInput').value;
+  const wrap=document.getElementById('pwdStrengthWrap');
+  if(!pwd){wrap.style.display='none';updatePepperPreview();return;}
+  wrap.style.display='block';
+  let score=0;
+  if(pwd.length>=8) score++;if(pwd.length>=12) score++;
+  if(/[A-Z]/.test(pwd)) score++;if(/[0-9]/.test(pwd)) score++;if(/[^A-Za-z0-9]/.test(pwd)) score++;
+  const colors=['#ff4747','#ff8847','#ffcc47','#a8ff47','#47ffaa'];
+  const pcts=[20,40,60,80,100];
+  document.getElementById('pwdStrengthBar').style.width=pcts[score-1]+'%';
+  document.getElementById('pwdStrengthBar').style.background=colors[score-1];
+  document.getElementById('pwdStrengthScore').style.color=colors[score-1];
+  const levels=t('pwdStrengths');
+  document.getElementById('pwdStrengthScore').textContent=levels[score-1]||'';
+  updatePepperPreview();
+}
+function togglePwdVis(id){const inp=document.getElementById(id);inp.type=inp.type==='password'?'text':'password';}
+
+// ═══════════════════════════════════════════
+// SPLIT OPTIONS
+// ═══════════════════════════════════════════
+function renderSplitOptions(){
+  const modes=t('splitModes');
+  document.getElementById('splitModeGroup').innerHTML=Object.entries(modes).map(([k,v])=>`<button class="opt-btn${splitMode===k?' sel-pink':''}" data-mode="${escapeHtml(k)}">${escapeHtml(v)}</button>`).join('');
+  document.getElementById('splitByNWrap').style.display=splitMode==='everyN'?'flex':'none';
+  document.getElementById('splitByRangeWrap').style.display=splitMode==='ranges'?'flex':'none';
+  const descs=t('splitModeDescs');
+  document.getElementById('splitModeDesc').textContent=descs[splitMode]||'';
+}
+function setSplitMode(m){splitMode=m;renderSplitOptions();}
+
+// ═══════════════════════════════════════════
+// PAGE EDITOR
+// ═══════════════════════════════════════════
+async function loadPagesMode(file){
+  try{
+    const bytes=await readAsBuffer(file);
+    const {PDFDocument}=PDFLib;
+    pdfDoc=await PDFDocument.load(bytes).catch(()=>{throw new Error(t('errorProtected',file.name));});
+    const n=pdfDoc.getPageCount();
+    pageStates=Array.from({length:n},(_,i)=>({rotation:0,selected:false,originalIndex:i}));
+    pdfJsDoc=await pdfjsLib.getDocument({data:bytes}).promise;
+    document.getElementById('pageEditorTitle').textContent=t('pageEditorTitle',n);
+    document.getElementById('pageEditor').classList.add('visible');
+    renderPageEditor();
+  }catch(err){alert(t('errorMsg',err.message));}
+}
+function renderPageEditor(){
+  const grid=document.getElementById('pagesGrid');
+  grid.innerHTML='';
+  document.getElementById('pageEditorTitle').textContent=t('pageEditorTitle',pageStates.length);
+  pageStates.forEach((ps,i)=>{
+    const card=document.createElement('div');
+    card.className='page-card'+(ps.selected?' selected':'');
+    card.draggable=true;
+    card.innerHTML=[
+      '<div class="page-canvas-wrap" id="pcw-'+i+'">',
+        '<div style="font-size:.6rem;color:var(--muted)">...</div>',
+      '</div>',
+      '<div class="page-footer">',
+        '<span class="page-num">'+(i+1)+'</span>',
+        '<button class="page-rotate-btn">&#8635;</button>',
+      '</div>',
+      '<div class="page-selected-badge">&#10003;</div>'
+    ].join('');
+    // IIFE to capture index correctly in closures
+    (function(idx){
+      card.addEventListener('click', function(){ togglePageSelect(idx); });
+      card.addEventListener('dblclick', function(){ previewPage(idx); });
+      card.querySelector('.page-rotate-btn').addEventListener('click',function(e){e.stopPropagation();rotatePage(idx,90);});
+      card.addEventListener('dragstart', function(e){
+        pageDragSrc = idx;
+        setTimeout(function(){ card.classList.add('page-dragging'); }, 0);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      card.addEventListener('dragend', function(){
+        card.classList.remove('page-dragging');
+      });
+      card.addEventListener('dragover', function(e){
+        e.preventDefault();
+        if(_lastDragOverCard !== card){
+          if(_lastDragOverCard) _lastDragOverCard.classList.remove('page-drag-over');
+          card.classList.add('page-drag-over');
+          _lastDragOverCard = card;
+        }
+      });
+      card.addEventListener('dragleave', function(){
+        if(_lastDragOverCard === card){
+          card.classList.remove('page-drag-over');
+          _lastDragOverCard = null;
+        }
+      });
+      card.addEventListener('drop', function(e){
+        e.preventDefault();
+        card.classList.remove('page-drag-over');
+        if(pageDragSrc !== null && pageDragSrc !== idx){
+          var moved = pageStates.splice(pageDragSrc, 1)[0];
+          pageStates.splice(idx, 0, moved);
+          pageDragSrc = null;
+          renderPageEditor();
+        }
+      });
+    })(i);
+    grid.appendChild(card);
+    renderPageCard(i);
+  });
+}
+async function renderPageCard(i){
+  if(!pdfJsDoc) return;
+  try{
+    // Use originalIndex so the correct page image renders regardless of reorder position
+    const srcPage = (pageStates[i].originalIndex !== undefined ? pageStates[i].originalIndex : i) + 1;
+    const page = await pdfJsDoc.getPage(srcPage);
+    const vp = page.getViewport({scale: 0.5, rotation: pageStates[i].rotation});
+    const canvas = document.createElement('canvas');
+    canvas.width = vp.width; canvas.height = vp.height;
+    await page.render({canvasContext: canvas.getContext('2d'), viewport: vp}).promise;
+    const wrap = document.getElementById('pcw-'+i);
+    if(wrap){ wrap.innerHTML=''; wrap.appendChild(canvas); }
+  }catch(e){}
+}
+function togglePageSelect(i){
+  pageStates[i].selected=!pageStates[i].selected;
+  const cards=document.querySelectorAll('.page-card');
+  if(cards[i]){cards[i].classList.toggle('selected',pageStates[i].selected);const b=cards[i].querySelector('.page-selected-badge');if(b)b.style.display=pageStates[i].selected?'flex':'none';}
+}
+function selectAllPages(){pageStates.forEach((_,i)=>{pageStates[i].selected=true;});renderPageEditor();}
+function selectNonePages(){pageStates.forEach((_,i)=>{pageStates[i].selected=false;});renderPageEditor();}
+function rotatePage(i,deg){pageStates[i].rotation=((pageStates[i].rotation+deg)%360+360)%360;renderPageCard(i);}
+function rotateSelected(deg){pageStates.forEach((_,i)=>{if(pageStates[i].selected)rotatePage(i,deg);});}
+function deleteSelected(){
+  const sel=pageStates.filter(ps=>ps.selected);
+  if(!sel.length){alert(t('errorNoPages'));return;}
+  if(sel.length===pageStates.length){alert(t('errorDeleteAllPages'));return;}
+  pageStates=pageStates.filter(ps=>!ps.selected);renderPageEditor();
+}
+async function previewPage(i){
+  if(!pdfJsDoc)return;
+  const page=await pdfJsDoc.getPage(i+1);
+  const vp=page.getViewport({scale:1.5,rotation:pageStates[i].rotation});
+  const canvas=document.getElementById('modalCanvas');canvas.width=vp.width;canvas.height=vp.height;
+  await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+  document.getElementById('modalOverlay').classList.add('visible');
+}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('visible');}
+
+// ═══════════════════════════════════════════
+// ACTION DISPATCHER
+// ═══════════════════════════════════════════
+let isProcessing = false;
+let _processingTimer = null;
+function _finishProcessing(){
+  isProcessing=false;
+  document.getElementById('actionBtn').disabled=false;
+  document.getElementById('cancelBtn').style.display='none';
+  if(_processingTimer){clearTimeout(_processingTimer);_processingTimer=null;}
+}
+function runAction(){
+  if(isProcessing) return;
+  hide('successBanner');
+  isProcessing = true;
+  document.getElementById('actionBtn').disabled = true;
+  document.getElementById('cancelBtn').style.display='block';
+  _processingTimer=setTimeout(()=>{
+    if(isProcessing){_finishProcessing();hide('progressWrap');fail(new Error(t('errorTimeout')));}
+  },5*60*1000);
+  const actions={pdf:mergePDFs,img:convertImagesToPDF,txt:convertTxtToPDF,html:convertHtmlToPDF,pages:exportEditedPages,split:splitPDF,crop:applyCrop,redact:applyRedact,wm:applyWatermark,protect:protectPDF,ocr:runOCR};
+  Promise.resolve((actions[currentMode]||mergePDFs)()).finally(_finishProcessing);
+}
+
+// ═══════════════════════════════════════════
+// MERGE PDFs
+// ═══════════════════════════════════════════
+async function mergePDFs(){
+  show('progressWrap');setProgress(0,t('progressInit'));
+  try{
+    const {PDFDocument}=PDFLib;const merged=await PDFDocument.create();
+    for(let i=0;i<files.length;i++){
+      setProgress(Math.round((i/files.length)*88),t('progressRead',files[i].name));
+      const bytes=await readAsBuffer(files[i]);
+      const src=await PDFDocument.load(bytes).catch(()=>{throw new Error(t('errorProtected',files[i].name));});
+      const pages=await merged.copyPages(src,src.getPageIndices());
+      pages.forEach(p=>merged.addPage(p));
+    }
+    setProgress(95,t('progressGen'));
+    const name=getOutName('defaultName.pdf');
+    const useObjectStreams=parseInt(document.getElementById('compRange').value)>=2;
+    triggerDl(await merged.save({useObjectStreams}),name);
+    done(t('successPdf',name,files.length));
+  }catch(err){fail(err);}
+}
+
+// ═══════════════════════════════════════════
+// IMAGES → PDF
+// ═══════════════════════════════════════════
+async function convertImagesToPDF(){
+  show('progressWrap');setProgress(0,t('progressInit'));
+  try{
+    const {PDFDocument}=PDFLib;const pdf=await PDFDocument.create();
+    for(let i=0;i<files.length;i++){
+      setProgress(Math.round((i/files.length)*90),t('progressConvert',files[i].name));
+      const f=files[i];const bytes=await readAsBuffer(f);
+      let img;
+      if(f.type==='image/png'||f.name.toLowerCase().endsWith('.png'))img=await pdf.embedPng(bytes);
+      else{const bu=URL.createObjectURL(new Blob([bytes],{type:f.type}));const jb=await imgToJpeg(bu);URL.revokeObjectURL(bu);img=await pdf.embedJpg(jb);}
+      const{width:iw,height:ih}=img;
+      let pw,ph;
+      if(imgPageSize==='Auto'){pw=iw;ph=ih;}else{[pw,ph]=ih>iw?PAGE_SIZES[imgPageSize]:[PAGE_SIZES[imgPageSize][1],PAGE_SIZES[imgPageSize][0]];}
+      const page=pdf.addPage([pw,ph]);const mg=imgPageSize==='Auto'?0:20,mxW=pw-mg*2,mxH=ph-mg*2;
+      const ratio=iw/ih;let dW,dH;
+      if(imgFit==='cover'){if(mxW/mxH>ratio){dW=mxW;dH=mxW/ratio;}else{dH=mxH;dW=mxH*ratio;}}
+      else{if(mxW/mxH>ratio){dH=mxH;dW=mxH*ratio;}else{dW=mxW;dH=mxW/ratio;}}
+      page.drawImage(img,{x:mg+(mxW-dW)/2,y:mg+(mxH-dH)/2,width:dW,height:dH});
+    }
+    setProgress(96,t('progressGen'));
+    const name=getOutName('defaultName.img');triggerDl(await pdf.save(),name);
+    done(t('successImg',name,files.length));
+  }catch(err){fail(err);}
+}
+
+// ═══════════════════════════════════════════
+// TXT → PDF  (fixed)
+// ═══════════════════════════════════════════
+async function convertTxtToPDF(){
+  show('progressWrap');setProgress(0,t('progressInit'));
+  try{
+    const {PDFDocument,StandardFonts,rgb}=PDFLib;
+    const pdf=await PDFDocument.create();
+    const font=await pdf.embedFont(StandardFonts.Courier);
+    const [pageW,pageH]=PAGE_SIZES[txtPageSz]||PAGE_SIZES.A4;
+    const mg=TXT_MARGIN_PT[txtMarginSz];
+    const fsPt=TXT_FONT_PT[txtFontSize];
+    const lineH=fsPt*1.45;
+    const usableW=pageW-mg*2;
+    const usableH=pageH-mg*2;
+    // Use pdf-lib's accurate glyph width measurement
+    const charW=font.widthOfTextAtSize('M',fsPt); // Courier is monospace, all chars same width
+    const charsPerLine=Math.max(1,Math.floor(usableW/charW));
+    const linesPerPage=Math.max(1,Math.floor(usableH/lineH));
+
+    for(let fi=0;fi<files.length;fi++){
+      setProgress(Math.round((fi/files.length)*90),t('progressTxt',files[fi].name));
+      const raw=await readAsText(files[fi]);
+      // Normalize CRLF / CR
+      const rawLines=raw.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+
+      // Word-wrap each raw line
+      const wrapped=[];
+      for(const rawLine of rawLines){
+        if(!rawLine){wrapped.push('');continue;}
+        let pos=0;
+        while(pos<rawLine.length){
+          let end=pos+charsPerLine;
+          if(end>=rawLine.length){wrapped.push(rawLine.slice(pos));break;}
+          // Try break on space
+          let brk=rawLine.lastIndexOf(' ',end);
+          if(brk<=pos) brk=end; // no space found, hard break
+          wrapped.push(rawLine.slice(pos,brk));
+          pos=brk+(rawLine[brk]===' '?1:0);
+        }
+      }
+
+      // Paginate and draw
+      let page=null,y=0,lineCount=0;
+      const newPage=()=>{page=pdf.addPage([pageW,pageH]);y=pageH-mg-fsPt;lineCount=0;};
+      newPage();
+      for(const line of wrapped){
+        if(lineCount>=linesPerPage){newPage();}
+        if(line){
+          // Strip chars outside WinAnsi (Courier encoding)
+          const safe=line.replace(/[^\x20-\x7E\xA0-\xFF]/g,'?');
+          try{
+            page.drawText(safe,{x:mg,y,size:fsPt,font,color:rgb(0.05,0.05,0.05)});
+          }catch(e){
+            // Fallback: draw char by char, skip bad ones
+          }
+        }
+        y-=lineH;lineCount++;
+      }
+    }
+    setProgress(96,t('progressGen'));
+    const name=getOutName('defaultName.txt');triggerDl(await pdf.save(),name);
+    done(t('successTxt',name,files.length));
+  }catch(err){fail(err);}
+}
+
+// ═══════════════════════════════════════════
+// HTML → PDF
+// ═══════════════════════════════════════════
+async function convertHtmlToPDF(){
+  const html=document.getElementById('htmlEditor').value.trim();
+  if(!html){alert(t('errorNoHtml'));return;}
+  show('progressWrap');setProgress(0,t('progressHtml'));
+  try{
+    const {PDFDocument}=PDFLib;
+    const pdf=await PDFDocument.create();
+    const [pageW,pageH]=PAGE_SIZES[htmlPageSz]||PAGE_SIZES.A4;
+    const mgPt=TXT_MARGIN_PT[htmlMarginSz];
+    // Render HTML in hidden iframe → canvas capture per "page"
+    const iframe=document.createElement('iframe');
+    iframe.style.cssText='position:fixed;left:-9999px;top:0;width:'+(pageW*1.33)+'px;height:'+(pageH*1.33)+'px;border:none;';
+    iframe.sandbox='allow-same-origin';
+    document.body.appendChild(iframe);
+    await new Promise(res=>{
+      iframe.addEventListener('load',res,{once:true});
+      iframe.srcdoc=sanitizeHtmlForIframe(html);
+    });
+    await new Promise(r=>setTimeout(r,300)); // let styles apply
+    setProgress(30,t('progressGen'));
+    const iDoc=iframe.contentDocument;
+    const totalH=iDoc.body.scrollHeight;
+    const pageHpx=pageH*1.33;
+    const pageCount=Math.max(1,Math.ceil(totalH/pageHpx));
+    for(let p=0;p<pageCount;p++){
+      setProgress(30+Math.round((p/pageCount)*60),`Page ${p+1}/${pageCount}…`);
+      iframe.contentWindow.scrollTo(0,p*pageHpx);
+      await new Promise(r=>setTimeout(r,80));
+      // Use html2canvas approach via canvas
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.round(pageW*1.33);canvas.height=Math.round(pageHpx);
+      const ctx=canvas.getContext('2d');
+      ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
+      // Draw iframe content via drawWindow if available (Firefox), else fallback
+      if(ctx.drawWindow){
+        ctx.drawWindow(iframe.contentWindow,0,p*pageHpx,canvas.width,pageHpx,'#fff');
+      } else {
+        // Fallback: render as white page with text note
+        ctx.fillStyle='#555';ctx.font='14px sans-serif';
+        ctx.fillText(typeof t('htmlFallbackPage')==='function'?t('htmlFallbackPage')(p+1):t('htmlFallbackPage'),20,30);
+      }
+      const jpegData=canvas.toDataURL('image/jpeg',0.9);
+      const base64=jpegData.split(',')[1];
+      const imgBytes=Uint8Array.from(atob(base64),c=>c.charCodeAt(0));
+      const img=await pdf.embedJpg(imgBytes);
+      const pg=pdf.addPage([pageW,pageH]);
+      pg.drawImage(img,{x:0,y:0,width:pageW,height:pageH});
+    }
+    document.body.removeChild(iframe);
+    setProgress(96,t('progressDl'));
+    const name=getOutName('defaultName.html');triggerDl(await pdf.save(),name);
+    done(t('successHtml',name));
+  }catch(err){fail(err);}
+}
+
+// ═══════════════════════════════════════════
+// SPLIT PDF
+// ═══════════════════════════════════════════
+async function splitPDF(){
+  if(!files.length)return;
+  show('progressWrap');setProgress(0,t('progressInit'));
+  try{
+    const {PDFDocument}=PDFLib;
+    const bytes=await readAsBuffer(files[0]);
+    const src=await PDFDocument.load(bytes).catch(()=>{throw new Error(t('errorProtected',files[0].name));});
+    const totalPages=src.getPageCount();
+    const baseName=getOutName('defaultName.split').replace('.pdf','');
+    let parts=[];
+
+    if(splitMode==='each'){
+      parts=Array.from({length:totalPages},(_,i)=>([i]));
+    } else if(splitMode==='everyN'){
+      const n=Math.max(1,parseInt(document.getElementById('splitEveryN').value)||1);
+      for(let i=0;i<totalPages;i+=n) parts.push(Array.from({length:Math.min(n,totalPages-i)},(_,j)=>i+j));
+    } else {
+      // Parse range string
+      const raw=document.getElementById('splitRanges').value;
+      const segments=raw.split(',').map(s=>s.trim()).filter(Boolean);
+      for(const seg of segments){
+        const m=seg.match(/^(\d+)(?:-(\d+))?$/);
+        if(!m){fail(new Error(t('errorMsg',`Invalid range: ${seg}`)));return;}
+        const from=parseInt(m[1])-1,to=m[2]?parseInt(m[2])-1:from;
+        const indices=[];for(let i=from;i<=Math.min(to,totalPages-1);i++)indices.push(i);
+        if(indices.length) parts.push(indices);
+      }
+    }
+
+    for(let p=0;p<parts.length;p++){
+      setProgress(Math.round((p/parts.length)*90),t('progressSplit',p+1,parts.length));
+      const out=await PDFDocument.create();
+      const copied=await out.copyPages(src,parts[p]);
+      copied.forEach(pg=>out.addPage(pg));
+      const suffix=parts.length>1?`_${p+1}`:'';
+      triggerDl(await out.save(),`${baseName}${suffix}.pdf`);
+      await new Promise(r=>setTimeout(r,150));
+    }
+    done(t('successSplit',parts.length));
+  }catch(err){fail(err);}
+}
+
+// ═══════════════════════════════════════════
+// EXPORT EDITED PAGES
+// ═══════════════════════════════════════════
+async function exportEditedPages(){
+  if(!pdfDoc||!pageStates.length)return;
+  show('progressWrap');setProgress(0,t('progressPages'));
+  try{
+    const {PDFDocument}=PDFLib;
+    const out=await PDFDocument.create();
+    // Use originalIndex to copy pages in the user-defined order
+    const srcIndices=pageStates.map(ps=>Math.min(ps.originalIndex!==undefined?ps.originalIndex:0, pdfDoc.getPageCount()-1));
+    const copied=await out.copyPages(pdfDoc, srcIndices);
+    copied.forEach((p,i)=>{if(pageStates[i].rotation)p.setRotation(PDFLib.degrees(pageStates[i].rotation));out.addPage(p);});
+    setProgress(96,t('progressDl'));
+    const name=getOutName('defaultName.pages');triggerDl(await out.save(),name);
+    done(t('successPages',name,pageStates.length));
+  }catch(err){fail(err);}
+}
+
+// ═══════════════════════════════════════════
+// WATERMARK
+// ═══════════════════════════════════════════
+async function applyWatermark(){
+  if(!files.length)return;
+  show('progressWrap');setProgress(0,t('progressWm'));
+  try{
+    const {PDFDocument,rgb,degrees}=PDFLib;
+    const bytes=await readAsBuffer(files[0]);
+    const pdf=await PDFDocument.load(bytes).catch(()=>{throw new Error(t('errorProtected',files[0].name));});
+    const text=document.getElementById('wmText').value||'WATERMARK';
+    const opacity=parseInt(document.getElementById('wmOpacity').value)/100;
+    const size=parseInt(document.getElementById('wmSize').value);
+    const hex=wmColor.replace('#','');
+    const r=parseInt(hex.slice(0,2),16)/255,g=parseInt(hex.slice(2,4),16)/255,b=parseInt(hex.slice(4,6),16)/255;
+    const color=rgb(r,g,b);
+    const pages=pdf.getPages();
+    for(let i=0;i<pages.length;i++){
+      setProgress(Math.round(10+(i/pages.length)*80),t('progressWm'));
+      const page=pages[i];const{width:pw,height:ph}=page.getSize();
+      let x,y,rot=0;
+      if(wmPos==='diagonal'){x=pw*0.1;y=ph*0.5;rot=35;}
+      else if(wmPos==='center'){x=pw/2;y=ph/2;}
+      else if(wmPos==='topLeft'){x=pw*0.05;y=ph*0.92;}
+      else{x=pw*0.05;y=ph*0.05;}
+      page.drawText(text,{x,y,size,color,opacity,rotate:degrees(rot)});
+    }
+    setProgress(96,t('progressDl'));
+    const name=getOutName('defaultName.wm');triggerDl(await pdf.save(),name);
+    done(t('successWm',name));
+  }catch(err){fail(err);}
+}
+
+// ═══════════════════════════════════════════
+// PROTECT PDF
+// ═══════════════════════════════════════════
+async function protectPDF(){
+  const pwd=document.getElementById('pwdInput').value;
+  const pwd2=document.getElementById('pwdConfirm').value;
+  if(!pwd){alert(t('errorPwdEmpty'));return;}
+  if(pwd!==pwd2){alert(t('errorPwdMismatch'));return;}
+  if(!files.length)return;
+  const pepper=getPepperValue();
+  const effectivePwd=pepper+pwd;
+  show('progressWrap');setProgress(0,t('progressProtect'));
+  try{
+    const {PDFDocument}=PDFLib;
+    const bytes=await readAsBuffer(files[0]);
+    const pdf=await PDFDocument.load(bytes).catch(()=>{throw new Error(t('errorProtected',files[0].name));});
+    setProgress(50,t('progressProtect'));
+    const ownerRandom=Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b=>b.toString(16).padStart(2,'0')).join('');
+    // H2: pass chosen algorithm if the library exposes EncryptionAlgorithm enum
+    const _encEnum=PDFLib.EncryptionAlgorithm;
+    const _algoMap=_encEnum?{
+      'aes-128':_encEnum.AES_128??_encEnum.aes128??_encEnum['aes-128'],
+      'aes-256':_encEnum.AES_256??_encEnum.aes256??_encEnum['aes-256'],
+    }:null;
+    const _algoOpt=(_algoMap&&_algoMap[currentAlgo]!=null)?{encryptionAlgorithm:_algoMap[currentAlgo]}:{};
+    pdf.encrypt({
+      userPassword:effectivePwd,
+      ownerPassword:effectivePwd+'_owner_'+ownerRandom,
+      permissions:{printing:permissions.printing?'highResolution':'none',copying:permissions.copying,modifying:permissions.modifying,annotating:permissions.annotations,fillingForms:permissions.annotations},
+      ..._algoOpt,
+    });
+    setProgress(90,t('progressDl'));
+    const name=getOutName('defaultName.protect');triggerDl(await pdf.save(),name);
+    // H7 + M7: effacement de toutes les données sensibles après chiffrement
+    document.getElementById('pwdInput').value='';
+    document.getElementById('pwdConfirm').value='';
+    document.getElementById('pwdStrengthWrap').style.display='none';
+    const pm=document.getElementById('pepperManual');if(pm) pm.value='';
+    autoPepperVal='';generatePepper();updatePepperPreview();
+    done(t('successProtect',name));
+  }catch(err){fail(err);}
+}
+
+// ═══════════════════════════════════════════
+// OCR
+// ═══════════════════════════════════════════
+async function runOCR(){
+  if(!files.length)return;
+  show('progressWrap');setProgress(0,t('progressTesseract'));
+  document.getElementById('ocrPanel').style.display='none';
+  try{
+    // Dynamically load Tesseract if not already loaded
+    if(!window.Tesseract){
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js','sha512-2wYKf5SRmHOMuTUmSsOkTTwejJrRcL6oHK5zHw/8MPUwZgTEekmapU6UOkxs0KFy20eWWmCiL30fZoVrtRkcPQ==');
+    }
+    const file=files[0];
+    const isPdf=file.type==='application/pdf'||file.name.toLowerCase().endsWith('.pdf');
+    const langs=ocrLangs.size>0?[...ocrLangs].join('+'):'eng';
+    let fullText='';
+
+    if(!isPdf){
+      // Direct image OCR
+      setProgress(20,t('progressOcr',1));
+      const worker=await Tesseract.createWorker(langs,1,{logger:m=>{if(m.status==='recognizing text')setProgress(20+Math.round(m.progress*70),t('progressOcr',1));}});
+      const url=URL.createObjectURL(file);
+      const {data:{text}}=await worker.recognize(url);
+      URL.revokeObjectURL(url);
+      await worker.terminate();
+      fullText=text;
+    } else {
+      // PDF: render each page as image, then OCR
+      const bytes=await readAsBuffer(file);
+      const jsDoc=await pdfJsLoadDoc(bytes);
+      const n=jsDoc.numPages;
+      const worker=await Tesseract.createWorker(langs);
+      for(let i=1;i<=n;i++){
+        setProgress(Math.round((i-1)/n*90),t('progressOcr',`${i}/${n}`));
+        const page=await jsDoc.getPage(i);
+        const vp=page.getViewport({scale:2});
+        const canvas=document.createElement('canvas');canvas.width=vp.width;canvas.height=vp.height;
+        await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+        const url=canvas.toDataURL('image/png');
+        const {data:{text}}=await worker.recognize(url);
+        fullText+=`--- Page ${i} ---\n${text}\n\n`;
+      }
+      await worker.terminate();
+    }
+
+    setProgress(100,t('progressDl'));
+    ocrText=fullText.trim();
+    document.getElementById('ocrResult').textContent=ocrText||'(aucun texte détecté)';
+    document.getElementById('ocrPanel').style.display='flex';
+    setTimeout(()=>hide('progressWrap'),400);
+    document.getElementById('successText').textContent=t('successOcr');
+    show('successBanner');
+  }catch(err){fail(err);}
+}
+
+function loadScript(src,integrity){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;if(integrity){s.integrity=integrity;s.crossOrigin='anonymous';}s.addEventListener('load',res);s.addEventListener('error',rej);document.head.appendChild(s);});}
+
+function copyOcrText(){navigator.clipboard.writeText(ocrText).catch(()=>{});}
+function saveOcrAsTxt(){
+  const blob=new Blob([ocrText],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=getOutName('defaultName.ocr').replace('.pdf','.txt');a.click();
+  URL.revokeObjectURL(url);
+}
+async function saveOcrAsPdf(){
+  if(!ocrText)return;
+  // Reuse TXT conversion logic
+  const fakeTxt=new File([ocrText],'ocr-result.txt',{type:'text/plain'});
+  const prevFiles=files;const prevMode=currentMode;
+  files=[fakeTxt];currentMode='txt';
+  await convertTxtToPDF();
+  files=prevFiles;currentMode=prevMode;
+}
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+// ── pdfjsLib loader with password support ──────────────
+function pdfJsLoadDoc(bytes){
+  return new Promise((res,rej)=>{
+    let task;
+    task=pdfjsLib.getDocument({
+      data:bytes,
+      onPassword:(updatePassword,reason)=>{
+        const msg=reason===pdfjsLib.PasswordResponses.INCORRECT_PASSWORD
+          ?t('errorPasswordWrong'):t('errorPasswordRequired');
+        const pwd=prompt(msg);
+        if(pwd===null){task.destroy();rej(new Error(t('errorCancelled')));}
+        else updatePassword(pwd);
+      }
+    });
+    task.promise.then(res).catch(rej);
+  });
+}
+
+const _bufferCache=new WeakMap();
+function readAsBuffer(file){
+  if(_bufferCache.has(file))return Promise.resolve(_bufferCache.get(file));
+  return new Promise((res,rej)=>{const r=new FileReader();r.addEventListener('load',e=>{const buf=new Uint8Array(e.target.result);_bufferCache.set(file,buf);res(buf);});r.addEventListener('error',()=>rej(new Error(t('errorRead'))));r.readAsArrayBuffer(file);});
+}
+function readAsText(file){return new Promise((res,rej)=>{const r=new FileReader();r.addEventListener('load',e=>res(e.target.result));r.addEventListener('error',()=>rej(new Error(t('errorRead'))));r.readAsText(file,'UTF-8');});}
+function imgToJpeg(url){return new Promise((res,rej)=>{const img=new Image();img.addEventListener('load',()=>{const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;c.getContext('2d').drawImage(img,0,0);c.toBlob(b=>b.arrayBuffer().then(buf=>res(new Uint8Array(buf))).catch(rej),'image/jpeg',.92);});img.addEventListener('error',()=>rej(new Error('img load')));img.src=url;});}
+function getOutName(key){
+  const raw=document.getElementById('outputName').value.trim()||t(key);
+  // Strip path-traversal chars and anything not suitable for a filename
+  const sanitized=raw.replace(/[/\\:*?"<>|]/g,'_').replace(/\.{2,}/g,'_').slice(0,100);
+  return (sanitized||'output')+'.pdf';
+}
+function triggerDl(bytes,name){const url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
+function setProgress(pct,label){document.getElementById('progressBar').style.width=pct+'%';document.getElementById('progressPct').textContent=pct+'%';document.getElementById('progressLabel').textContent=label;}
+function show(id){document.getElementById(id).classList.add('visible');}
+function hide(id){document.getElementById(id).classList.remove('visible');}
+function done(msg){setTimeout(()=>{hide('progressWrap');document.getElementById('successText').textContent=msg;show('successBanner');},600);}
+function fail(err){hide('progressWrap');alert(t('errorMsg',err.message||err));}
+
+
+// ═══════════════════════════════════════════
+// CROP PDF
+// ═══════════════════════════════════════════
+// === CROP interactive state ===
+let _cropRect   = null;  // {x,y,w,h} in canvas px (null = full page)
+let _cropDrag   = null;  // drag state
+let _cropSnap   = null;  // ImageData snapshot of rendered page
+let _cropScale  = 1;     // canvas px per PDF pt
+let _cropPageW  = PAGE_SIZES.A4[0];
+let _cropPageH  = PAGE_SIZES.A4[1];
+let _cropListenersAttached = false;
+const CROP_HANDLE_SIZE = 10; // px
+
+function renderCropApplyUI(){
+  var modes = t('cropApplyModes') || {all:'Toutes les pages',single:'Page specifique'};
+  var grp = document.getElementById('cropApplyGroup');
+  if(!grp) return;
+  var html = '';
+  Object.keys(modes).forEach(function(k){
+    var active = cropApply===k ? ' sel-teal' : '';
+    html += '<button class="opt-btn'+active+'" data-apply="'+escapeHtml(k)+'">'+escapeHtml(modes[k])+'</button>';
+  });
+  grp.innerHTML = html;
+  var row = document.getElementById('cropPageSelectorRow');
+  if(row) row.style.display = cropApply==='single' ? 'flex' : 'none';
+}
+function setCropApply(v){ cropApply=v; renderCropApplyUI(); loadCropPage(); }
+
+function cropPrevPage(){
+  var inp=document.getElementById('cropPageNum');
+  if(inp) inp.value=Math.max(1,parseInt(inp.value||1)-1);
+  loadCropPage();
+}
+function cropNextPage(){
+  var inp=document.getElementById('cropPageNum');
+  if(inp&&_cropPdfJsDoc) inp.value=Math.min(_cropPdfJsDoc.numPages,parseInt(inp.value||1)+1);
+  loadCropPage();
+}
+function resetCropRect(){
+  var canvas=document.getElementById('cropPreviewCanvas');
+  if(!canvas) return;
+  _cropRect={x:0,y:0,w:canvas.width,h:canvas.height};
+  drawCropOverlay();
+  updateCropCoords();
+}
+
+let _cropBusy = false;
+async function loadCropPage(){
+  var canvas=document.getElementById('cropPreviewCanvas');
+  var wrap=document.getElementById('cropPreviewWrap');
+  var ph=document.getElementById('cropPreviewPlaceholder');
+  if(!canvas||!wrap) return;
+  if(!files.length||currentMode!=='crop'){ if(ph)ph.style.display='flex'; return; }
+  if(_cropBusy) return;
+  _cropBusy=true;
+  if(ph) ph.style.display='none';
+  try{
+    if(!_cropPdfJsDoc){
+      var bytes=await readAsBuffer(files[0]);
+      _cropPdfJsDoc=await pdfJsLoadDoc(bytes);
+    }
+    var totEl=document.getElementById('cropPageTotal');
+    if(totEl) totEl.textContent='/ '+_cropPdfJsDoc.numPages;
+
+    var pageNum=cropApply==='single'
+      ? Math.max(1,Math.min(parseInt(document.getElementById('cropPageNum').value)||1,_cropPdfJsDoc.numPages))
+      : 1;
+
+    var dpr=window.devicePixelRatio||1;
+    var cssW=wrap.clientWidth||600;
+    var page=await _cropPdfJsDoc.getPage(pageNum);
+    var uvp=page.getViewport({scale:1});
+    var scale=(cssW*dpr)/uvp.width;
+    var vp=page.getViewport({scale:scale});
+    var cssH=Math.round(vp.height/dpr);
+
+    canvas.width=Math.round(vp.width);
+    canvas.height=Math.round(vp.height);
+    canvas.style.height=cssH+'px';
+    _cropScale=scale;
+    _cropPageW=uvp.width;
+    _cropPageH=uvp.height;
+
+    var ctx=canvas.getContext('2d');
+    await page.render({canvasContext:ctx,viewport:vp}).promise;
+    _cropSnap=null; // release previous ImageData before capturing new one
+    _cropSnap=ctx.getImageData(0,0,canvas.width,canvas.height);
+
+    if(!_cropRect||_cropRect.w===0){
+      _cropRect={x:0,y:0,w:canvas.width,h:canvas.height};
+    }
+    drawCropOverlay();
+    updateCropCoords();
+    if(!_cropListenersAttached){ setupCropDrawing(canvas); _cropListenersAttached=true; }
+  }catch(e){ if(ph) ph.style.display='flex'; }
+  _cropBusy=false;
+}
+// Backward compat alias
+function updateCropPreview(){ loadCropPage(); }
+
+function getCropHandles(){
+  if(!_cropRect) return [];
+  var r=_cropRect;
+  return [
+    {id:'nw',x:r.x,      y:r.y},
+    {id:'n', x:r.x+r.w/2,y:r.y},
+    {id:'ne',x:r.x+r.w,  y:r.y},
+    {id:'e', x:r.x+r.w,  y:r.y+r.h/2},
+    {id:'se',x:r.x+r.w,  y:r.y+r.h},
+    {id:'s', x:r.x+r.w/2,y:r.y+r.h},
+    {id:'sw',x:r.x,      y:r.y+r.h},
+    {id:'w', x:r.x,      y:r.y+r.h/2}
+  ];
+}
+
+function hitHandle(px,py){
+  var dpr=window.devicePixelRatio||1;
+  var hs=(CROP_HANDLE_SIZE+3)*dpr;
+  var handles=getCropHandles();
+  for(var i=0;i<handles.length;i++){
+    if(Math.abs(px-handles[i].x)<hs && Math.abs(py-handles[i].y)<hs) return handles[i].id;
+  }
+  return null;
+}
+
+function insideCropRect(px,py){
+  if(!_cropRect) return false;
+  return px>=_cropRect.x && px<=_cropRect.x+_cropRect.w && py>=_cropRect.y && py<=_cropRect.y+_cropRect.h;
+}
+
+function drawCropOverlay(){
+  var canvas=document.getElementById('cropPreviewCanvas');
+  if(!canvas||!_cropSnap||!_cropRect) return;
+  if(!_cropCtx||_cropCtx.canvas!==canvas) _cropCtx=canvas.getContext('2d');
+  var ctx=_cropCtx;
+  var dpr=window.devicePixelRatio||1;
+  ctx.putImageData(_cropSnap,0,0);
+  var x=_cropRect.x, y=_cropRect.y, w=_cropRect.w, h=_cropRect.h;
+  var cW=canvas.width, cH=canvas.height;
+  ctx.save();
+  ctx.fillStyle='rgba(0,0,0,0.50)';
+  ctx.fillRect(0,0,cW,y);
+  ctx.fillRect(0,y+h,cW,cH-(y+h));
+  ctx.fillRect(0,y,x,h);
+  ctx.fillRect(x+w,y,cW-(x+w),h);
+  ctx.restore();
+  ctx.save();
+  ctx.strokeStyle='#47d4ff';
+  ctx.lineWidth=Math.round(2*dpr);
+  ctx.setLineDash([Math.round(7*dpr),Math.round(3*dpr)]);
+  ctx.strokeRect(x,y,w,h);
+  ctx.setLineDash([]);
+  var hs=CROP_HANDLE_SIZE*dpr;
+  var handles=getCropHandles();
+  ctx.fillStyle='#47d4ff';
+  ctx.strokeStyle='#fff';
+  ctx.lineWidth=Math.round(1.5*dpr);
+  for(var i=0;i<handles.length;i++){
+    ctx.fillRect(handles[i].x-hs/2,handles[i].y-hs/2,hs,hs);
+    ctx.strokeRect(handles[i].x-hs/2,handles[i].y-hs/2,hs,hs);
+  }
+  ctx.restore();
+}
+
+function updateCropCoords(){
+  if(!_cropRect) return;
+  var ptX=Math.round(_cropRect.x/_cropScale);
+  var ptH=Math.round(_cropRect.h/_cropScale);
+  var ptY=Math.round(_cropPageH-(_cropRect.y+_cropRect.h)/_cropScale);
+  var ptW=Math.round(_cropRect.w/_cropScale);
+  var el=document.getElementById('cropCoordsVal');
+  if(el) el.textContent='x:'+ptX+' y:'+ptY+' '+ptW+'\u00d7'+ptH+' pt';
+  var row=document.getElementById('cropCoordsRow');
+  if(row) row.style.display='flex';
+}
+
+function setupCropDrawing(canvas){
+  var CURSOR_MAP={nw:'nw-resize',n:'n-resize',ne:'ne-resize',e:'e-resize',
+                  se:'se-resize',s:'s-resize',sw:'sw-resize',w:'w-resize'};
+  function getPos(e){
+    var rect=canvas.getBoundingClientRect();
+    var sx=canvas.width/rect.width, sy=canvas.height/rect.height;
+    var src=e.touches?e.touches[0]:e;
+    return {cx:(src.clientX-rect.left)*sx, cy:(src.clientY-rect.top)*sy};
+  }
+  canvas.addEventListener('mousemove',function(e){
+    if(!_cropDrag){
+      var p=getPos(e);
+      var hnd=hitHandle(p.cx,p.cy);
+      canvas.style.cursor=hnd?CURSOR_MAP[hnd]:(insideCropRect(p.cx,p.cy)?'move':'crosshair');
+      return;
+    }
+    var p=getPos(e);
+    var dx=p.cx-_cropDrag.startX, dy=p.cy-_cropDrag.startY;
+    var or=_cropDrag.origRect;
+    var cW=canvas.width, cH=canvas.height;
+    var nx=or.x,ny=or.y,nw=or.w,nh=or.h;
+    var t=_cropDrag.type;
+    if(t==='create'){
+      nx=Math.min(_cropDrag.startX,p.cx); ny=Math.min(_cropDrag.startY,p.cy);
+      nw=Math.abs(p.cx-_cropDrag.startX); nh=Math.abs(p.cy-_cropDrag.startY);
+    } else if(t==='move'){
+      nx=Math.max(0,Math.min(cW-or.w,or.x+dx));
+      ny=Math.max(0,Math.min(cH-or.h,or.y+dy));
+    } else {
+      if(t.indexOf('n')>=0){ ny=Math.max(0,Math.min(or.y+or.h-10,or.y+dy)); nh=or.h-(ny-or.y); }
+      if(t.indexOf('s')>=0){ nh=Math.max(10,Math.min(cH-or.y,or.h+dy)); }
+      if(t.indexOf('w')>=0){ nx=Math.max(0,Math.min(or.x+or.w-10,or.x+dx)); nw=or.w-(nx-or.x); }
+      if(t.indexOf('e')>=0){ nw=Math.max(10,Math.min(cW-or.x,or.w+dx)); }
+    }
+    _cropRect={x:nx,y:ny,w:nw,h:nh};
+    drawCropOverlay();
+    updateCropCoords();
+  });
+  canvas.addEventListener('mousedown',function(e){
+    e.preventDefault();
+    var p=getPos(e);
+    var hnd=hitHandle(p.cx,p.cy);
+    if(hnd){
+      _cropDrag={type:hnd,startX:p.cx,startY:p.cy,origRect:Object.assign({},_cropRect)};
+    } else if(insideCropRect(p.cx,p.cy)){
+      _cropDrag={type:'move',startX:p.cx,startY:p.cy,origRect:Object.assign({},_cropRect)};
+    } else {
+      _cropDrag={type:'create',startX:p.cx,startY:p.cy,origRect:{x:p.cx,y:p.cy,w:0,h:0}};
+      _cropRect={x:p.cx,y:p.cy,w:0,h:0};
+    }
+  });
+  function finishDrag(){
+    if(!_cropDrag) return;
+    if(_cropRect&&_cropRect.w<5&&_cropRect.h<5){
+      _cropRect={x:0,y:0,w:canvas.width,h:canvas.height};
+      drawCropOverlay();
+    }
+    _cropDrag=null;
+    updateCropCoords();
+  }
+  canvas.addEventListener('mouseup',finishDrag);
+  canvas.addEventListener('mouseleave',function(){ if(_cropDrag) finishDrag(); });
+  canvas.addEventListener('contextmenu',function(e){e.preventDefault();});
+}
+
+async function applyCrop(){
+  if(!files.length) return;
+  if(!_cropRect||(_cropRect.w<5&&_cropRect.h<5)){
+    alert(t('errorNoCropZone'));return;
+  }
+  show('progressWrap'); setProgress(0, t('progressCrop')||'Rognage...');
+  try{
+    const {PDFDocument}=PDFLib;
+    const bytes=await readAsBuffer(files[0]);
+    const pdf=await PDFDocument.load(bytes).catch(()=>{throw new Error(t('errorProtected',files[0].name));});
+    const pages=pdf.getPages();
+    const single=cropApply==='single';
+    const targetPage=single?Math.max(1,Math.min(parseInt(document.getElementById('cropPageNum').value)||1,pages.length))-1:-1;
+
+    const ptX=_cropRect.x/_cropScale;
+    const ptY=_cropPageH-(_cropRect.y+_cropRect.h)/_cropScale;
+    const ptW=_cropRect.w/_cropScale;
+    const ptH=_cropRect.h/_cropScale;
+
+    pages.forEach(function(page,i){
+      if(single&&i!==targetPage) return;
+      const sz=page.getSize();
+      const sx=sz.width/_cropPageW, sy=sz.height/_cropPageH;
+      page.setCropBox(ptX*sx, ptY*sy, ptW*sx, ptH*sy);
+    });
+
+    setProgress(90, t('progressDl'));
+    const name=getOutName('defaultName.crop');
+    triggerDl(await pdf.save(), name);
+    done(t('successCrop',name));
+  }catch(err){ fail(err); }
+}
+
+// ═══════════════════════════════════════════
+// REDACT PDF
+// ═══════════════════════════════════════════
+const REDACT_COLORS = ['#000000','#1a1a1a','#003366','#8B0000','#2d2d2d'];
+
+function renderRedactColorUI(){
+  const grp = document.getElementById('redactColorGroup');
+  if(!grp) return;
+  grp.innerHTML = REDACT_COLORS.map(c=>
+    `<div class="color-swatch${_redactColor===c?' active':''}" style="background:${c};border-color:${_redactColor===c?'#fff':'transparent'}"></div>`
+  ).join('');
+  grp.querySelectorAll('.color-swatch').forEach((el,i)=>{el.addEventListener('click',()=>setRedactColor(REDACT_COLORS[i]));});
+}
+function setRedactColor(c){ _redactColor=c; renderRedactColorUI(); redrawRedactCanvas(); }
+
+let _redactCurrentPageBytes = null;
+
+let _redactListenersAttached = false;
+let _redactBusy = false;
+
+async function loadRedactPage(){
+  const canvas  = document.getElementById('redactCanvas');
+  const wrap    = document.getElementById('redactCanvasWrap');
+  const ph      = document.getElementById('redactPlaceholder');
+  if(!canvas||!wrap||!files.length||currentMode!=='redact') return;
+  if(_redactBusy) return;
+  _redactBusy = true;
+  ph.style.display='none';
+  try{
+    if(!_redactPdfJsDoc){
+      const bytes = await readAsBuffer(files[0]);
+      _redactPdfJsDoc = await pdfJsLoadDoc(bytes);
+      const tot = document.getElementById('redactPageTotal');
+      if(tot) tot.textContent = '/ '+_redactPdfJsDoc.numPages;
+      const inp = document.getElementById('redactPageNum');
+      if(inp) inp.max = _redactPdfJsDoc.numPages;
+    }
+    await redrawRedactCanvas();
+    // Attach drawing listeners only once (not on every page change)
+    if(!_redactListenersAttached){
+      setupRedactDrawing(canvas);
+      _redactListenersAttached = true;
+    }
+  }catch(e){ if(ph) ph.style.display='flex'; }
+  _redactBusy = false;
+}
+
+async function redrawRedactCanvas(){
+  const canvas = document.getElementById('redactCanvas');
+  const wrap   = document.getElementById('redactCanvasWrap');
+  if(!canvas||!wrap||!_redactPdfJsDoc) return;
+
+  const pageNum = Math.max(1, Math.min(parseInt(document.getElementById('redactPageNum').value)||1, _redactPdfJsDoc.numPages));
+  const dpr   = window.devicePixelRatio||1;
+  const cssW  = wrap.clientWidth||600;
+  const page  = await _redactPdfJsDoc.getPage(pageNum);
+  const uvp   = page.getViewport({scale:1});
+  const scale = (cssW*dpr)/uvp.width;
+  const vp    = page.getViewport({scale});
+  const cssH  = Math.round(vp.height/dpr);
+
+  canvas.width  = Math.round(vp.width);
+  canvas.height = Math.round(vp.height);
+  canvas.style.height = cssH+'px';
+  canvas._pdfScale = scale; // store for coord mapping
+  canvas._pdfPage  = pageNum;
+  canvas._pageW    = uvp.width;
+  canvas._pageH    = uvp.height;
+
+  const ctx = canvas.getContext('2d');
+  await page.render({canvasContext:ctx, viewport:vp}).promise;
+
+  // Draw existing zones for this page
+  const zones = redactZones.filter(z=>z.page===pageNum);
+  zones.forEach(z=>{
+    const px = z.x * scale, py = (z.pageH - z.y - z.h) * scale;
+    const pw = z.w * scale, ph2 = z.h * scale;
+    ctx.fillStyle = z.color;
+    ctx.fillRect(px, py, pw, ph2);
+  });
+
+  // Store a pixel snapshot so mousemove can restore it cheaply
+  canvas._snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+  renderRedactZonesList();
+}
+
+function setupRedactDrawing(canvas){
+  // Attach directly on the canvas element — no cloning needed.
+  // Canvas metadata (_pdfScale etc.) is always kept up-to-date by redrawRedactCanvas.
+  var getPos = function(e){
+    var rect = canvas.getBoundingClientRect();
+    var scaleX = canvas.width / rect.width;
+    var scaleY = canvas.height / rect.height;
+    var src = e.touches ? e.touches[0] : e;
+    return {
+      cx: (src.clientX - rect.left) * scaleX,
+      cy: (src.clientY - rect.top)  * scaleY
+    };
+  };
+
+  canvas.addEventListener('mousedown', function(e){
+    e.preventDefault();
+    var p = getPos(e);
+    _redactDrawing = true;
+    _redactStart = {cx: p.cx, cy: p.cy};
+  });
+
+  var _redactCtx = canvas.getContext('2d');
+  canvas.addEventListener('mousemove', function(e){
+    if(!_redactDrawing || !_redactStart) return;
+    var p = getPos(e);
+    var cx = p.cx, cy = p.cy;
+    // Draw live preview rectangle on top of the last rendered state
+    // We keep a snapshot to avoid calling the async redraw on every mousemove
+    var ctx = _redactCtx;
+    // Restore snapshot if available
+    if(canvas._snapshot){
+      ctx.putImageData(canvas._snapshot, 0, 0);
+    }
+    var x = Math.min(_redactStart.cx, cx), y = Math.min(_redactStart.cy, cy);
+    var w = Math.abs(cx - _redactStart.cx), h = Math.abs(cy - _redactStart.cy);
+    ctx.save();
+    ctx.fillStyle = _redactColor + 'aa';
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 3]);
+    ctx.strokeRect(x, y, w, h);
+    ctx.restore();
+  });
+
+  canvas.addEventListener('mouseup', function(e){
+    if(!_redactDrawing || !_redactStart) return;
+    _redactDrawing = false;
+    var p = getPos(e);
+    var cx = p.cx, cy = p.cy;
+    var x = Math.min(_redactStart.cx, cx), y = Math.min(_redactStart.cy, cy);
+    var w = Math.abs(cx - _redactStart.cx), h = Math.abs(cy - _redactStart.cy);
+    _redactStart = null;
+    if(w < 5 || h < 5) return;
+    // Convert canvas px -> PDF points using metadata set by redrawRedactCanvas
+    var s    = canvas._pdfScale || 1;
+    var pH   = canvas._pageH    || PAGE_SIZES.A4[1];
+    var pNum = canvas._pdfPage  || 1;
+    var rx   = x / s;
+    var rh_  = h / s;
+    var ry   = pH - (y / s) - rh_;
+    redactZones.push({page: pNum, x: rx, y: ry, w: w/s, h: rh_, pageH: pH, color: _redactColor});
+    redrawRedactCanvas(); // re-render to commit the new zone properly
+  });
+
+  // Prevent context menu on right-click
+  canvas.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+}
+
+function redactPrevPage(){
+  const inp=document.getElementById('redactPageNum');
+  if(!inp)return;
+  inp.value=Math.max(1,parseInt(inp.value||1)-1);
+  loadRedactPage();
+}
+function redactNextPage(){
+  const inp=document.getElementById('redactPageNum');
+  if(!inp||!_redactPdfJsDoc)return;
+  inp.value=Math.min(_redactPdfJsDoc.numPages,parseInt(inp.value||1)+1);
+  loadRedactPage();
+}
+
+function renderRedactZonesList(){
+  const list=document.getElementById('redactZonesList');
+  if(!list)return;
+  const pageNum=parseInt(document.getElementById('redactPageNum')?.value||1);
+  const zones=redactZones.filter(z=>z.page===pageNum);
+  if(!zones.length){list.innerHTML='';return;}
+  let localNum=0;
+  list.innerHTML=redactZones.map((z,globalIdx)=>{
+    if(z.page!==pageNum) return '';
+    localNum++;
+    return `<div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:.75rem;color:var(--muted);">
+      <div style="width:12px;height:12px;border-radius:3px;background:${safeHexColor(z.color)};flex-shrink:0;"></div>
+      <span>Zone ${localNum} — x:${Math.round(z.x)} y:${Math.round(z.y)} w:${Math.round(z.w)} h:${Math.round(z.h)} pt</span>
+      <button data-idx="${globalIdx}" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--red);font-size:.85rem;">✕</button>
+    </div>`;
+  }).join('');
+}
+function removeRedactZone(i){redactZones.splice(i,1);redrawRedactCanvas();}
+function clearRedactZones(){redactZones=[];redrawRedactCanvas();}
+
+async function applyRedact(){
+  if(!files.length)return;
+  if(!redactZones.length){alert(t('errorNoRedactZones'));return;}
+  if(!confirm(t('redactConfirmMsg')))return;
+  show('progressWrap');setProgress(0,t('progressRedact')||'Censure…');
+  try{
+    const {PDFDocument, rgb} = PDFLib;
+    const bytes = await readAsBuffer(files[0]);
+    const pdf   = await PDFDocument.load(bytes).catch(()=>{throw new Error(t('errorProtected',files[0].name));});
+    const pages = pdf.getPages();
+
+    redactZones.forEach(z=>{
+      const page = pages[z.page-1];
+      if(!page)return;
+      const hex=safeHexColor(z.color).slice(1);
+      const r=parseInt(hex.slice(0,2),16)/255, g=parseInt(hex.slice(2,4),16)/255, b=parseInt(hex.slice(4,6),16)/255;
+      page.drawRectangle({x:z.x, y:z.y, width:z.w, height:z.h, color:rgb(r,g,b), opacity:1});
+    });
+
+    setProgress(90, t('progressDl'));
+    const name = getOutName('defaultName.redact');
+    triggerDl(await pdf.save(), name);
+    done(t('successRedact', name, redactZones.length));
+  }catch(err){ fail(err); }
+}
+
+// ═══════════════════════════════════════════
+// EVENT LISTENERS
+// ═══════════════════════════════════════════
+function initEventListeners(){
+  // Language
+  document.querySelectorAll('.lang-btn[data-lang]').forEach(btn=>btn.addEventListener('click',()=>setLang(btn.dataset.lang)));
+  // Theme + caps
+  document.getElementById('themeBtn').addEventListener('click',toggleTheme);
+  document.getElementById('capsHeader').addEventListener('click',toggleCaps);
+  // Cancel button
+  document.getElementById('cancelBtn').addEventListener('click',()=>{
+    if(!isProcessing)return;
+    _finishProcessing();hide('progressWrap');
+  });
+  // Mode tabs
+  document.querySelectorAll('.mode-tab[data-mode]').forEach(btn=>btn.addEventListener('click',()=>setMode(btn.dataset.mode)));
+  // HTML templates
+  document.querySelectorAll('[data-tpl]').forEach(btn=>btn.addEventListener('click',()=>loadHtmlTemplate(btn.dataset.tpl)));
+  // Page editor
+  document.getElementById('btnSelectAll').addEventListener('click',selectAllPages);
+  document.getElementById('btnSelectNone').addEventListener('click',selectNonePages);
+  document.getElementById('btnRotate90').addEventListener('click',()=>rotateSelected(90));
+  document.getElementById('btnRotateMinus90').addEventListener('click',()=>rotateSelected(-90));
+  document.getElementById('btnDelete').addEventListener('click',deleteSelected);
+  // Compression
+  document.getElementById('compRange').addEventListener('input',updateCompUI);
+  // Watermark
+  document.getElementById('wmText').addEventListener('input',debouncedUpdateWmPreview);
+  document.getElementById('wmOpacity').addEventListener('input',function(){document.getElementById('wmOpacityVal').textContent=this.value+'%';debouncedUpdateWmPreview();});
+  document.getElementById('wmSize').addEventListener('input',function(){document.getElementById('wmSizeVal').textContent=this.value;debouncedUpdateWmPreview();});
+  // Crop
+  document.getElementById('cropPageNum').addEventListener('input',loadCropPage);
+  document.getElementById('cropPrevBtn').addEventListener('click',cropPrevPage);
+  document.getElementById('cropNextBtn').addEventListener('click',cropNextPage);
+  document.getElementById('cropResetBtn').addEventListener('click',resetCropRect);
+  // Redact
+  document.getElementById('redactPageNum').addEventListener('input',loadRedactPage);
+  document.getElementById('redactPrevBtn').addEventListener('click',redactPrevPage);
+  document.getElementById('redactNextBtn').addEventListener('click',redactNextPage);
+  document.getElementById('redactClearBtn').addEventListener('click',clearRedactZones);
+  // Protect
+  document.getElementById('pwdInput').addEventListener('input',updatePwdStrength);
+  document.getElementById('pwdVisBtn').addEventListener('click',()=>togglePwdVis('pwdInput'));
+  document.getElementById('pwdConfirmVisBtn').addEventListener('click',()=>togglePwdVis('pwdConfirm'));
+  document.getElementById('pepperModeManual').addEventListener('click',()=>setPepperMode('manual'));
+  document.getElementById('pepperModeAuto').addEventListener('click',()=>setPepperMode('auto'));
+  document.getElementById('pepperManual').addEventListener('input',updatePepperPreview);
+  document.getElementById('pepperGenBtn').addEventListener('click',generatePepper);
+  // OCR
+  // OCR language toggle
+  document.getElementById('ocrLangGroup').addEventListener('click',e=>{
+    const btn=e.target.closest('[data-lang]');
+    if(!btn)return;
+    const lang=btn.dataset.lang;
+    if(ocrLangs.has(lang)){
+      if(ocrLangs.size<=1)return; // keep at least one language selected
+      ocrLangs.delete(lang);
+      btn.classList.remove('sel-blue');
+    }else{
+      ocrLangs.add(lang);
+      btn.classList.add('sel-blue');
+    }
+  });
+  document.getElementById('ocrCopyBtn').addEventListener('click',copyOcrText);
+  document.getElementById('ocrSaveBtn').addEventListener('click',saveOcrAsTxt);
+  document.getElementById('ocrSavePdfBtn').addEventListener('click',saveOcrAsPdf);
+  // Main actions
+  document.getElementById('actionBtn').addEventListener('click',runAction);
+  document.getElementById('clearAllBtn').addEventListener('click',clearAll);
+  // File list: delegation for remove buttons
+  document.getElementById('fileList').addEventListener('click',function(e){
+    const btn=e.target.closest('button.file-remove[data-idx]');
+    if(btn)removeFile(parseInt(btn.dataset.idx,10));
+  });
+  // Dynamic option groups: event delegation
+  document.getElementById('pageSizeGroup').addEventListener('click',e=>{const b=e.target.closest('[data-sz]');if(b)setImgOpt('sz',b.dataset.sz);});
+  document.getElementById('fitGroup').addEventListener('click',e=>{const b=e.target.closest('[data-fit]');if(b)setImgOpt('fit',b.dataset.fit);});
+  document.getElementById('txtFontSizeGroup').addEventListener('click',e=>{const b=e.target.closest('[data-fs]');if(b)setTxtOpt('fs',b.dataset.fs);});
+  document.getElementById('txtPageSzGroup').addEventListener('click',e=>{const b=e.target.closest('[data-ps]');if(b)setTxtOpt('ps',b.dataset.ps);});
+  document.getElementById('txtMgGroup').addEventListener('click',e=>{const b=e.target.closest('[data-mg]');if(b)setTxtOpt('mg',b.dataset.mg);});
+  document.getElementById('htmlPageSzGroup').addEventListener('click',e=>{const b=e.target.closest('[data-ps]');if(b)setHtmlOpt('ps',b.dataset.ps);});
+  document.getElementById('htmlMgGroup').addEventListener('click',e=>{const b=e.target.closest('[data-mg]');if(b)setHtmlOpt('mg',b.dataset.mg);});
+  document.getElementById('wmPosGroup').addEventListener('click',e=>{const b=e.target.closest('[data-pos]');if(b)setWmPos(b.dataset.pos);});
+  document.getElementById('encAlgoGroup').addEventListener('click',e=>{const b=e.target.closest('[data-algo]');if(b)setAlgo(b.dataset.algo);});
+  document.getElementById('splitModeGroup').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(b)setSplitMode(b.dataset.mode);});
+  document.getElementById('cropApplyGroup').addEventListener('click',e=>{const b=e.target.closest('[data-apply]');if(b)setCropApply(b.dataset.apply);});
+  document.getElementById('redactZonesList').addEventListener('click',e=>{const b=e.target.closest('button[data-idx]');if(b)removeRedactZone(parseInt(b.dataset.idx,10));});
+  // Modal
+  const overlay=document.getElementById('modalOverlay');
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal();});
+  document.getElementById('modalBox').addEventListener('click',e=>e.stopPropagation());
+  document.getElementById('modalClose').addEventListener('click',closeModal);
+  // Clear sensitive data on tab close
+  window.addEventListener('beforeunload',clearSensitiveData);
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+window.addEventListener('unhandledrejection',e=>{
+  console.error('[PDF Fusion] Unhandled rejection:',e.reason);
+  e.preventDefault();
+  if(isProcessing){ isProcessing=false; document.getElementById('actionBtn').disabled=false; }
+  fail(e.reason instanceof Error?e.reason:new Error(String(e.reason||'Erreur inattendue')));
+});
+currentLang=detectLang();
+setLang(currentLang);
+loadHtmlTemplate('basic');
+renderHtmlOptions();
+initEventListeners();
+</script>
+</body>
+</html>
